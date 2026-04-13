@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteOgImage, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Criar bolão",
@@ -11,12 +12,23 @@ export const metadata: Metadata = {
     title: "Bolão da Copa 2026: criar previsão",
     description:
       "Monte sua chave da Copa 2026 em poucos passos e compartilhe pelo celular.",
-    url: "/predict"
+    url: `${siteUrl}/predict`,
+    images: [
+      {
+        url: siteOgImage,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: "Bolão da Copa 2026 - criar previsão"
+      }
+    ]
   },
   twitter: {
+    card: "summary_large_image",
     title: "Bolão da Copa 2026: criar previsão",
     description:
-      "Escolha classificados, avance o mata-mata e compartilhe sua chave da Copa 2026."
+      "Escolha classificados, avance o mata-mata e compartilhe sua chave da Copa 2026.",
+    images: [siteOgImage]
   }
 };
 

@@ -95,6 +95,7 @@ export default function SharePage() {
               </CardContent>
             </Card>
           </div>
+          <PageFooter />
         </main>
       }
     >

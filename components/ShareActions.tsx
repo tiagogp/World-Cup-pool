@@ -21,6 +21,8 @@ export function ShareActions({
   const [copied, setCopied] = useState(false);
 
   const copyShareUrl = async () => {
+    setCopied(false);
+
     if (shareUrl && navigator.clipboard) {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -29,6 +31,7 @@ export function ShareActions({
 
   const sharePrediction = async () => {
     let url = "";
+    setCopied(false);
 
     try {
       url = await onShare();
@@ -54,6 +57,11 @@ export function ShareActions({
     }
   };
 
+  const generateShareUrl = () => {
+    setCopied(false);
+    onGenerateShareUrl();
+  };
+
   return (
     <div className="rounded-[30px] bg-white p-4 shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px]">
       <div className="grid gap-2 sm:grid-cols-3">
@@ -61,7 +69,7 @@ export function ShareActions({
           <Share2 className="mr-2 size-4" />
           Compartilhar previsão
         </Button>
-        <Button type="button" variant="secondary" onClick={onGenerateShareUrl}>
+        <Button type="button" variant="secondary" onClick={generateShareUrl}>
           <Copy className="mr-2 size-4" />
           Gerar link
         </Button>

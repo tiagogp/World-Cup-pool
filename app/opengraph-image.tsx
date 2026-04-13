@@ -76,10 +76,18 @@ export default function Image() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 36
+                position: "relative"
               }}
             >
-              ⚽
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  background: "#ffffff",
+                  border: "8px solid #0e0f0c"
+                }}
+              />
             </div>
             Bolão da Copa 2026
           </div>

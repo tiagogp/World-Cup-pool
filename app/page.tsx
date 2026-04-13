@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageFooter } from "@/components/PageFooter";
 import { PageHeader } from "@/components/PageHeader";
-import { siteDescription, siteName, siteUrl } from "@/lib/site";
+import { siteDescription, siteName, siteOgImage, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Bolão e simulador de chaves",
@@ -16,7 +16,22 @@ export const metadata: Metadata = {
   openGraph: {
     title: `${siteName}: bolão e simulador de chaves`,
     description: siteDescription,
-    url: "/"
+    url: siteUrl,
+    images: [
+      {
+        url: siteOgImage,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: "Bolão da Copa 2026 - simulador de chaves"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteName}: bolão e simulador de chaves`,
+    description: siteDescription,
+    images: [siteOgImage]
   }
 };
 
@@ -33,8 +48,8 @@ const flow = [
   },
   {
     icon: Share2,
-    title: "Salve e compartilhe",
-    text: "Guarde no navegador ou envie um link com a previsão completa.",
+    title: "Compartilhe no celular",
+    text: "Use o compartilhamento nativo ou copie um link com a previsão completa.",
   },
 ];
 
@@ -87,10 +102,19 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative min-h-[440px] overflow-hidden rounded-[40px] bg-[#0e0f0c] p-5 text-white">
-          <div className="absolute right-[-90px] top-[-90px] size-72 rounded-full bg-[#9fe870]" />
-          <div className="absolute bottom-[-120px] left-[-80px] size-80 rounded-full bg-[#e2f6d5]/20" />
-          <div className="relative grid h-full min-h-[400px] grid-rows-[1fr_auto]">
+        <div className="min-h-[440px] overflow-hidden rounded-[40px] bg-[#0e0f0c] p-5 text-white">
+          <div className="mb-5 grid grid-cols-6 overflow-hidden rounded-full">
+            {["#9fe870", "#cdffad", "#e2f6d5", "#9fe870", "#cdffad", "#e2f6d5"].map(
+              (color, index) => (
+                <span
+                  key={`${color}-${index}`}
+                  className="h-3"
+                  style={{ backgroundColor: color }}
+                />
+              )
+            )}
+          </div>
+          <div className="grid h-full min-h-[400px] grid-rows-[1fr_auto]">
             <div className="grid grid-cols-2 gap-3">
               {[
                 ["12", "grupos"],

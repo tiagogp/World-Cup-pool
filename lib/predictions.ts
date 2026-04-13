@@ -228,20 +228,119 @@ export function getChampionTeamId(matches: KnockoutMatch[]) {
   return matches.find((match) => match.id === "final")?.winnerTeamId ?? null;
 }
 
+const groupPickChars = "0123x";
+const knockoutPickChars = "012";
+const knockoutMatchIds = [
+  ...roundOf24Sources.map((match) => match.id),
+  ...derivedRoundSources.map((match) => match.id)
+];
+
+function serializeCompactPredictionState(state: PredictionState) {
+  const groupToken = groups
+    .map((group) => {
+      const pick = state.groupPicks[group.code];
+      const firstIndex = pick?.firstTeamId ? group.teamIds.indexOf(pick.firstTeamId) : -1;
+      const secondIndex = pick?.secondTeamId ? group.teamIds.indexOf(pick.secondTeamId) : -1;
+
+      return `${groupPickChars[firstIndex >= 0 ? firstIndex : 4]}${
+        groupPickChars[secondIndex >= 0 ? secondIndex : 4]
+      }`;
+    })
+    .join("");
+
+  const qualifiersByGroup = getQualifiersByGroup(state.groupPicks);
+  const bracket = advanceKnockoutWinners(qualifiersByGroup, state.knockoutSelections);
+  const matchById = new Map(bracket.map((match) => [match.id, match]));
+
+  const knockoutToken = knockoutMatchIds
+    .map((matchId) => {
+      const match = matchById.get(matchId);
+
+      if (!match?.winnerTeamId) {
+        return "0";
+      }
+
+      if (match.winnerTeamId === match.homeTeamId) {
+        return "1";
+      }
+
+      if (match.winnerTeamId === match.awayTeamId) {
+        return "2";
+      }
+
+      return "0";
+    })
+    .join("");
+
+  return `v2-${groupToken}-${knockoutToken}`;
+}
+
+function deserializeCompactPredictionState(value: string): PredictionState | null {
+  const [, groupToken, knockoutToken] = value.split("-");
+
+  if (!groupToken || !knockoutToken || groupToken.length !== groups.length * 2) {
+    return null;
+  }
+
+  const groupPicks = createEmptyGroupPicks();
+
+  groups.forEach((group, groupIndex) => {
+    const firstChar = groupToken[groupIndex * 2];
+    const secondChar = groupToken[groupIndex * 2 + 1];
+    const firstIndex = groupPickChars.indexOf(firstChar);
+    const secondIndex = groupPickChars.indexOf(secondChar);
+    const firstTeamId = firstIndex >= 0 && firstIndex < 4 ? group.teamIds[firstIndex] : null;
+    const secondTeamId =
+      secondIndex >= 0 && secondIndex < 4 && group.teamIds[secondIndex] !== firstTeamId
+        ? group.teamIds[secondIndex]
+        : null;
+
+    groupPicks[group.code] = {
+      groupCode: group.code,
+      firstTeamId,
+      secondTeamId
+    };
+  });
+
+  const knockoutSelections: Record<string, string> = {};
+  const qualifiersByGroup = getQualifiersByGroup(groupPicks);
+
+  knockoutMatchIds.forEach((matchId, index) => {
+    const pickChar = knockoutToken[index] ?? "0";
+
+    if (!knockoutPickChars.includes(pickChar) || pickChar === "0") {
+      return;
+    }
+
+    const bracket = advanceKnockoutWinners(qualifiersByGroup, knockoutSelections);
+    const match = bracket.find((candidate) => candidate.id === matchId);
+    const selectedTeamId = pickChar === "1" ? match?.homeTeamId : match?.awayTeamId;
+
+    if (selectedTeamId) {
+      knockoutSelections[matchId] = selectedTeamId;
+    }
+  });
+
+  const bracket = advanceKnockoutWinners(qualifiersByGroup, knockoutSelections);
+
+  return {
+    groupPicks,
+    knockoutSelections,
+    championTeamId: getChampionTeamId(bracket)
+  };
+}
+
 export function serializePredictionState(state: PredictionState) {
-  return encodeURIComponent(
-    btoa(
-      JSON.stringify({
-        groupPicks: state.groupPicks,
-        knockoutSelections: state.knockoutSelections
-      })
-    )
-  );
+  return serializeCompactPredictionState(state);
 }
 
 export function deserializePredictionState(value: string | null): PredictionState | null {
   if (!value) {
     return null;
+  }
+
+  if (value.startsWith("v2-")) {
+    return deserializeCompactPredictionState(value);
   }
 
   try {

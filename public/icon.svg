@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Bolão da Copa 2026">
+  <rect width="192" height="192" rx="54" fill="#9fe870"/>
+  <path d="M58 48h48c31 0 49 14 49 39 0 14-8 25-21 31 15 6 24 18 24 35 0 27-20 43-52 43H58V48z" fill="#0e0f0c"/>
+  <path d="M89 75v31h17c13 0 20-6 20-16s-7-15-20-15H89zM89 131v34h19c14 0 22-6 22-17s-8-17-22-17H89z" fill="#9fe870"/>
+  <circle cx="52" cy="46" r="22" fill="#ffffff"/>
+  <path d="M52 29l10 7v20l-10 7-10-7V36l10-7z" fill="#0e0f0c"/>
+  <path d="M37 47h8M59 47h8M44 34l5 6M60 34l-5 6M44 60l5-6M60 60l-5-6" stroke="#0e0f0c" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

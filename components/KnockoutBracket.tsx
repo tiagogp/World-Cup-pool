@@ -35,7 +35,7 @@ type BracketSide = "left" | "right";
 type SideRound = "roundOf24" | "roundOf16" | "quarterfinal" | "semifinal";
 
 const leftRounds: SideRound[] = ["roundOf24", "roundOf16", "quarterfinal", "semifinal"];
-const rightRounds: SideRound[] = ["semifinal", "quarterfinal", "roundOf16", "roundOf24"];
+const rightRounds: SideRound[] = ["roundOf24", "roundOf16", "quarterfinal", "semifinal"];
 
 function sideMatches(matches: KnockoutMatch[], round: SideRound, side: BracketSide) {
   const roundMatches = matches.filter((match) => match.round === round);
@@ -125,12 +125,12 @@ function BracketSide({ side, matches, onWinnerSelect, readOnly }: BracketSidePro
   const rounds = side === "left" ? leftRounds : rightRounds;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-4">
+    <div className={cn("grid gap-4 lg:grid-cols-4", side === "right" && "lg:[direction:rtl]")}>
       {rounds.map((round) => {
         const roundMatches = sideMatches(matches, round, side);
 
         return (
-          <section key={`${side}-${round}`} className="min-w-0">
+          <section key={`${side}-${round}`} className="min-w-0 lg:[direction:ltr]">
             <div className={cn("mb-3 flex items-center gap-2", side === "right" && "lg:justify-end")}>
               <h3 className="wise-display text-[28px] leading-[0.85]">{roundLabels[round]}</h3>
               <span className="rounded-full bg-[#e2f6d5] px-2 py-1 text-xs font-semibold text-[#163300]">

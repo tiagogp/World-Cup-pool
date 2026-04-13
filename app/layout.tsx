@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo_Black, Inter } from "next/font/google";
-import { siteDescription, siteName, siteUrl } from "@/lib/site";
+import { siteDescription, siteName, siteOgImage, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -42,15 +42,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "/",
+    url: siteUrl,
     siteName,
     title: "Bolão da Copa 2026: simulador de chaves",
     description: "Bolão da Copa 2026 para escolher classificados, montar o mata-mata e compartilhar sua previsão.",
     images: [
       {
-        url: "/opengraph-image",
+        url: siteOgImage,
         width: 1200,
         height: 630,
+        type: "image/png",
         alt: "Bolão da Copa 2026 - simulador de chaves"
       }
     ]
@@ -59,7 +60,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Bolão da Copa 2026: simulador de chaves",
     description: "Bolão da Copa 2026 para montar sua chave e compartilhar sua previsão.",
-    images: ["/opengraph-image"]
+    images: [siteOgImage]
   },
   robots: {
     index: true,
@@ -75,16 +76,26 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url:
-          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%239fe870'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-size='30' font-family='Arial' font-weight='700' fill='%23163300'%3E⚽%3C/text%3E%3C/svg%3E"
+        url: "/icon.svg",
+        type: "image/svg+xml"
       }
     ],
+    shortcut: ["/icon.svg"],
     apple: [
       {
-        url:
-          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='44' fill='%239fe870'/%3E%3Ctext x='90' y='112' text-anchor='middle' font-size='88' font-family='Arial' font-weight='700' fill='%23163300'%3E⚽%3C/text%3E%3C/svg%3E"
+        url: "/apple-icon.svg",
+        type: "image/svg+xml",
+        sizes: "180x180"
       }
     ]
+  },
+  other: {
+    "og:image": siteOgImage,
+    "og:image:secure_url": siteOgImage,
+    "og:image:type": "image/png",
+    "og:image:width": "1200",
+    "og:image:height": "630",
+    "twitter:image": siteOgImage
   }
 };
 
