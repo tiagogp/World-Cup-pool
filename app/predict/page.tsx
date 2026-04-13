@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { groups } from "@/data/world-cup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageFooter } from "@/components/PageFooter";
 import { PageHeader } from "@/components/PageHeader";
 import { StepProgress } from "@/components/StepProgress";
 import { GroupCard } from "@/components/GroupCard";
@@ -12,10 +14,8 @@ import { KnockoutBracket } from "@/components/KnockoutBracket";
 import { ReviewSummary } from "@/components/ReviewSummary";
 import { ShareActions } from "@/components/ShareActions";
 import {
-  STORAGE_KEY,
   advanceKnockoutWinners,
   areGroupPredictionsComplete,
-  deserializePredictionState,
   getChampionTeamId,
   getInitialPredictionState,
   getQualifiersByGroup,
@@ -53,18 +53,62 @@ function removeTeamFromGroupPick(pick: GroupPick, teamId: string): GroupPick {
 }
 
 export default function PredictPage() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [state, setState] = useState<PredictionState>(() => getInitialPredictionState());
   const [shareUrl, setShareUrl] = useState("");
   const [saved, setSaved] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [pendingNavigationUrl, setPendingNavigationUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const restored = deserializePredictionState(stored);
-    if (restored) {
-      setState(restored);
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  useEffect(() => {
+    const interceptNavigation = (event: MouseEvent) => {
+      if (!hasUnsavedChanges) {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      const link = target?.closest("a");
+
+      if (!link?.href) {
+        return;
+      }
+
+      const nextUrl = new URL(link.href);
+      const currentPath = `${window.location.pathname}${window.location.search}`;
+      const nextPath = `${nextUrl.pathname}${nextUrl.search}`;
+
+      if (nextUrl.origin === window.location.origin && nextPath === currentPath) {
+        return;
+      }
+
+      event.preventDefault();
+      setPendingNavigationUrl(nextUrl.href);
+    };
+
+    document.addEventListener("click", interceptNavigation, true);
+    return () => document.removeEventListener("click", interceptNavigation, true);
+  }, [hasUnsavedChanges]);
+
+  const markDirty = () => {
+    if (!hasUnsavedChanges) {
+      setHasUnsavedChanges(true);
     }
-  }, []);
+  };
 
   const qualifiersByGroup = useMemo(
     () => getQualifiersByGroup(state.groupPicks),
@@ -85,6 +129,7 @@ export default function PredictPage() {
   const knockoutComplete = Boolean(championTeamId);
 
   const updateGroupPick = (groupCode: string, teamId: string) => {
+    markDirty();
     setSaved(false);
     setShareUrl("");
     setState((current) => ({
@@ -99,6 +144,7 @@ export default function PredictPage() {
   };
 
   const removeGroupPick = (groupCode: string, teamId: string) => {
+    markDirty();
     setSaved(false);
     setShareUrl("");
     setState((current) => ({
@@ -113,6 +159,7 @@ export default function PredictPage() {
   };
 
   const updateWinner = (matchId: string, teamId: string) => {
+    markDirty();
     setSaved(false);
     setShareUrl("");
     setState((current) => ({
@@ -127,11 +174,11 @@ export default function PredictPage() {
 
   const createShareUrl = () => {
     const nextState = { ...state, championTeamId };
-    localStorage.setItem(STORAGE_KEY, serializePredictionState(nextState));
     const encoded = serializePredictionState(nextState);
     const url = `${window.location.origin}/predict/share?p=${encoded}`;
     setShareUrl(url);
     setSaved(true);
+    setHasUnsavedChanges(false);
     return url;
   };
 
@@ -149,7 +196,23 @@ export default function PredictPage() {
     setStep(0);
     setShareUrl("");
     setSaved(false);
-    localStorage.removeItem(STORAGE_KEY);
+    setHasUnsavedChanges(false);
+  };
+
+  const leaveWithoutSaving = () => {
+    if (!pendingNavigationUrl) {
+      return;
+    }
+
+    setHasUnsavedChanges(false);
+    setPendingNavigationUrl(null);
+    const nextUrl = new URL(pendingNavigationUrl);
+    if (nextUrl.origin === window.location.origin) {
+      router.push(`${nextUrl.pathname}${nextUrl.search}`);
+      return;
+    }
+
+    window.location.href = pendingNavigationUrl;
   };
 
   return (
@@ -277,6 +340,27 @@ export default function PredictPage() {
           </section>
         ) : null}
       </div>
+      {pendingNavigationUrl ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-[#0e0f0c]/55 px-4">
+          <div className="w-full max-w-md rounded-[30px] bg-white p-6 shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px]">
+            <h2 className="wise-display text-[40px] leading-[0.85] text-[#0e0f0c]">
+              Sair do bolão?
+            </h2>
+            <p className="mt-4 text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
+              Sua previsão ainda não foi compartilhada. Se sair agora, essas escolhas serão perdidas.
+            </p>
+            <div className="mt-6 grid gap-2 sm:grid-cols-2">
+              <Button type="button" variant="secondary" onClick={() => setPendingNavigationUrl(null)}>
+                Continuar editando
+              </Button>
+              <Button type="button" onClick={leaveWithoutSaving}>
+                Sair mesmo assim
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      <PageFooter />
     </main>
   );
 }

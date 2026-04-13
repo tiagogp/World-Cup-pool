@@ -45,12 +45,21 @@ export const metadata: Metadata = {
     url: "/",
     siteName,
     title: "Bolão da Copa 2026: simulador de chaves",
-    description: "Bolão da Copa 2026 para escolher classificados, montar o mata-mata e compartilhar sua previsão."
+    description: "Bolão da Copa 2026 para escolher classificados, montar o mata-mata e compartilhar sua previsão.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Bolão da Copa 2026 - simulador de chaves"
+      }
+    ]
   },
   twitter: {
     card: "summary_large_image",
     title: "Bolão da Copa 2026: simulador de chaves",
-    description: "Bolão da Copa 2026 para montar sua chave e compartilhar sua previsão."
+    description: "Bolão da Copa 2026 para montar sua chave e compartilhar sua previsão.",
+    images: ["/opengraph-image"]
   },
   robots: {
     index: true,

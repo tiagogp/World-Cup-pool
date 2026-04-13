@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ListChecks, Share2, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageFooter } from "@/components/PageFooter";
 import { PageHeader } from "@/components/PageHeader";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
 
@@ -139,6 +140,7 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      <PageFooter />
     </main>
   );
 }

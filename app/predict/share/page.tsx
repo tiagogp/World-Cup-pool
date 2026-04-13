@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageFooter } from "@/components/PageFooter";
 import { PageHeader } from "@/components/PageHeader";
 import { ReviewSummary } from "@/components/ReviewSummary";
 import { groups } from "@/data/world-cup";
@@ -76,6 +77,7 @@ function SharePageContent() {
           </Card>
         )}
       </div>
+      <PageFooter />
     </main>
   );
 }

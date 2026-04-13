@@ -9,8 +9,6 @@ import type {
   Team
 } from "@/types/predictions";
 
-export const STORAGE_KEY = "world-cup-prediction-state";
-
 export const teamById = new Map(teams.map((team) => [team.id, team]));
 
 export function getTeam(teamId: string | null): Team | null {
