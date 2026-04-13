@@ -1,0 +1,274 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { groups } from "@/data/world-cup";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/PageHeader";
+import { StepProgress } from "@/components/StepProgress";
+import { GroupCard } from "@/components/GroupCard";
+import { KnockoutBracket } from "@/components/KnockoutBracket";
+import { ReviewSummary } from "@/components/ReviewSummary";
+import { ShareActions } from "@/components/ShareActions";
+import {
+  STORAGE_KEY,
+  advanceKnockoutWinners,
+  areGroupPredictionsComplete,
+  deserializePredictionState,
+  getChampionTeamId,
+  getInitialPredictionState,
+  getQualifiersByGroup,
+  serializePredictionState
+} from "@/lib/predictions";
+import type { GroupPick, PredictionState } from "@/types/predictions";
+
+function addTeamToGroupPick(pick: GroupPick, teamId: string): GroupPick {
+  if (pick.firstTeamId === teamId || pick.secondTeamId === teamId) {
+    return pick;
+  }
+
+  if (!pick.firstTeamId) {
+    return { ...pick, firstTeamId: teamId };
+  }
+
+  if (!pick.secondTeamId) {
+    return { ...pick, secondTeamId: teamId };
+  }
+
+  return pick;
+}
+
+function removeTeamFromGroupPick(pick: GroupPick, teamId: string): GroupPick {
+  const remaining = [pick.firstTeamId, pick.secondTeamId].filter(
+    (selectedTeamId): selectedTeamId is string =>
+      Boolean(selectedTeamId) && selectedTeamId !== teamId
+  );
+
+  return {
+    ...pick,
+    firstTeamId: remaining[0] ?? null,
+    secondTeamId: remaining[1] ?? null
+  };
+}
+
+export default function PredictPage() {
+  const [step, setStep] = useState(0);
+  const [state, setState] = useState<PredictionState>(() => getInitialPredictionState());
+  const [shareUrl, setShareUrl] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const restored = deserializePredictionState(stored);
+    if (restored) {
+      setState(restored);
+    }
+  }, []);
+
+  const qualifiersByGroup = useMemo(
+    () => getQualifiersByGroup(state.groupPicks),
+    [state.groupPicks]
+  );
+
+  const groupStageComplete = areGroupPredictionsComplete(state.groupPicks);
+
+  const bracket = useMemo(
+    () =>
+      groupStageComplete
+        ? advanceKnockoutWinners(qualifiersByGroup, state.knockoutSelections)
+        : [],
+    [groupStageComplete, qualifiersByGroup, state.knockoutSelections]
+  );
+
+  const championTeamId = getChampionTeamId(bracket);
+  const knockoutComplete = Boolean(championTeamId);
+
+  const updateGroupPick = (groupCode: string, teamId: string) => {
+    setSaved(false);
+    setShareUrl("");
+    setState((current) => ({
+      ...current,
+      championTeamId: null,
+      knockoutSelections: {},
+      groupPicks: {
+        ...current.groupPicks,
+        [groupCode]: addTeamToGroupPick(current.groupPicks[groupCode], teamId)
+      }
+    }));
+  };
+
+  const removeGroupPick = (groupCode: string, teamId: string) => {
+    setSaved(false);
+    setShareUrl("");
+    setState((current) => ({
+      ...current,
+      championTeamId: null,
+      knockoutSelections: {},
+      groupPicks: {
+        ...current.groupPicks,
+        [groupCode]: removeTeamFromGroupPick(current.groupPicks[groupCode], teamId)
+      }
+    }));
+  };
+
+  const updateWinner = (matchId: string, teamId: string) => {
+    setSaved(false);
+    setShareUrl("");
+    setState((current) => ({
+      ...current,
+      knockoutSelections: {
+        ...current.knockoutSelections,
+        [matchId]: teamId
+      },
+      championTeamId: matchId === "final" ? teamId : current.championTeamId
+    }));
+  };
+
+  const savePrediction = () => {
+    const nextState = { ...state, championTeamId };
+    localStorage.setItem(STORAGE_KEY, serializePredictionState(nextState));
+    setSaved(true);
+  };
+
+  const generateShareUrl = () => {
+    const encoded = serializePredictionState({ ...state, championTeamId });
+    const url = `${window.location.origin}/predict/share?p=${encoded}`;
+    setShareUrl(url);
+  };
+
+  const resetAll = () => {
+    const initial = getInitialPredictionState();
+    setState(initial);
+    setStep(0);
+    setShareUrl("");
+    setSaved(false);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
+  return (
+    <main className="min-h-screen">
+      <PageHeader />
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">
+                Prediction builder
+              </p>
+              <h1 className="mt-2 text-3xl font-black sm:text-4xl">Your World Cup path</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Pick the two teams that qualify from each group. Then choose every knockout winner.
+              </p>
+            </div>
+            {saved ? (
+              <div className="inline-flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary">
+                <CheckCircle2 className="size-4" />
+                Saved locally
+              </div>
+            ) : null}
+          </div>
+          <StepProgress
+            currentStep={step}
+            onStepChange={setStep}
+            canOpenKnockout={groupStageComplete}
+            canOpenReview={knockoutComplete}
+          />
+        </div>
+
+        {step === 0 ? (
+          <section className="space-y-5">
+            <div className="grid gap-4 lg:grid-cols-2">
+              {groups.map((group) => (
+                <GroupCard
+                  key={group.code}
+                  group={group}
+                  pick={state.groupPicks[group.code]}
+                  onTeamToggle={updateGroupPick}
+                  onTeamRemove={removeGroupPick}
+                />
+              ))}
+            </div>
+            <Card>
+              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {groupStageComplete
+                    ? "All group qualifiers are selected. The knockout bracket is ready."
+                    : "Choose 1st and 2nd place in every group to unlock the knockout bracket."}
+                </p>
+                <Button
+                  type="button"
+                  disabled={!groupStageComplete}
+                  onClick={() => setStep(1)}
+                >
+                  Build knockout bracket
+                  <ArrowRight className="ml-2 size-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </section>
+        ) : null}
+
+        {step === 1 ? (
+          <section className="space-y-5">
+            {groupStageComplete ? (
+              <>
+                <KnockoutBracket
+                  matches={bracket}
+                  championTeamId={championTeamId}
+                  onWinnerSelect={updateWinner}
+                />
+                <Card>
+                  <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {knockoutComplete
+                        ? "The champion is set. Review the full prediction."
+                        : "Pick winners through the final to complete the tournament."}
+                    </p>
+                    <Button
+                      type="button"
+                      disabled={!knockoutComplete}
+                      onClick={() => setStep(2)}
+                    >
+                      Review prediction
+                      <ArrowRight className="ml-2 size-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <Card>
+                <CardContent className="p-5">
+                  <h2 className="text-lg font-bold">Group stage first</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Choose the two qualifiers from every group before opening the bracket.
+                  </p>
+                  <Button className="mt-4" type="button" onClick={() => setStep(0)}>
+                    Return to group stage
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </section>
+        ) : null}
+
+        {step === 2 ? (
+          <section className="space-y-5">
+            <ShareActions
+              shareUrl={shareUrl}
+              onSave={savePrediction}
+              onGenerateShareUrl={generateShareUrl}
+              onReset={resetAll}
+            />
+            <ReviewSummary
+              groups={groups}
+              groupPicks={state.groupPicks}
+              bracket={bracket}
+              championTeamId={championTeamId}
+            />
+          </section>
+        ) : null}
+      </div>
+    </main>
+  );
+}
