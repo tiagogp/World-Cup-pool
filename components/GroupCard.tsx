@@ -20,7 +20,7 @@ export function GroupCard({
   pick,
   onTeamToggle,
   onTeamRemove,
-  readOnly
+  readOnly,
 }: GroupCardProps) {
   const completed = Boolean(pick.firstTeamId && pick.secondTeamId);
   const selectedTeamIds = [pick.firstTeamId, pick.secondTeamId].filter(Boolean);
@@ -31,7 +31,7 @@ export function GroupCard({
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle>Grupo {group.code}</CardTitle>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm font-semibold tracking-[-0.108px] text-[#868685]">
               Clique em dois times. A ordem define 1º e 2º.
             </p>
           </div>
@@ -39,13 +39,12 @@ export function GroupCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {completed ? (
+        {readOnly && completed ? (
           <div className="grid gap-2 sm:grid-cols-2">
             <SelectionPill label="1º" teamId={pick.firstTeamId} />
             <SelectionPill label="2º" teamId={pick.secondTeamId} />
           </div>
         ) : null}
-
         {!readOnly ? (
           <div className="space-y-2">
             {group.teamIds.map((teamId) => {
@@ -64,24 +63,34 @@ export function GroupCard({
                       : onTeamToggle?.(group.code, teamId)
                   }
                   className={cn(
-                    "flex min-h-12 w-full items-center justify-between gap-3 rounded border px-3 py-2 text-left text-[15px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#097fe8] [&_.text-muted-foreground]:text-current/60",
+                    "flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left text-[18px] font-semibold tracking-[-0.108px] transition-transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#163300] [&_.text-muted-foreground]:text-current/60",
                     selected
-                      ? "border-transparent bg-[#0075de] text-white"
-                      : "border-[rgba(0,0,0,0.1)] bg-white text-[rgba(0,0,0,0.95)] hover:bg-[#f6f5f4]",
+                      ? "bg-[#9fe870] text-[#163300]"
+                      : "bg-white text-[#0e0f0c] shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px] hover:bg-[#e2f6d5]",
                     blocked &&
-                      "cursor-not-allowed bg-[#f6f5f4] text-[#a39e98] opacity-100 hover:bg-[#f6f5f4]"
+                      "cursor-not-allowed bg-[#e8ebe6] text-[#868685] opacity-70 hover:scale-100 hover:bg-[#e8ebe6]",
                   )}
                 >
-                  <TeamLabel teamId={teamId} />
+                  <div className="flex items-center gap-4">
+                    {selected ? (
+                      <span className="gap-1 text-xs font-semibold tracking-[-0.108px]">
+                        {selectedIndex === 0 ? "1º" : "2º"}
+                      </span>
+                    ) : null}
+                    <TeamLabel teamId={teamId} />
+                  </div>
                   {selected ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold">
-                      {selectedIndex === 0 ? "1º" : "2º"}
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold tracking-[-0.108px]">
                       <X className="size-3" aria-hidden />
                     </span>
                   ) : blocked ? (
-                    <span className="text-xs text-[#a39e98]">Limite</span>
+                    <span className="text-xs font-semibold text-[#868685]">
+                      Limite
+                    </span>
                   ) : (
-                    <span className="text-xs text-[#615d59]">Selecionar</span>
+                    <span className="text-xs font-semibold text-[#454745]">
+                      Selecionar
+                    </span>
                   )}
                 </button>
               );
@@ -100,9 +109,11 @@ type SelectionPillProps = {
 
 function SelectionPill({ label, teamId }: SelectionPillProps) {
   return (
-    <div className="rounded border border-[rgba(0,117,222,0.18)] bg-[#f2f9ff] px-3 py-2">
-      <p className="text-[10px] font-bold uppercase tracking-[0.125px] text-[#097fe8]">{label}</p>
-      <div className="mt-1 text-sm font-semibold">
+    <div className="rounded-2xl bg-[#e2f6d5] px-4 py-3">
+      <p className="text-xs font-semibold tracking-[-0.108px] text-[#163300]">
+        {label}
+      </p>
+      <div className="mt-1 text-sm font-semibold tracking-[-0.108px]">
         <TeamLabel teamId={teamId} />
       </div>
     </div>

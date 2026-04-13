@@ -125,16 +125,22 @@ export default function PredictPage() {
     }));
   };
 
-  const savePrediction = () => {
+  const createShareUrl = () => {
     const nextState = { ...state, championTeamId };
     localStorage.setItem(STORAGE_KEY, serializePredictionState(nextState));
+    const encoded = serializePredictionState(nextState);
+    const url = `${window.location.origin}/predict/share?p=${encoded}`;
+    setShareUrl(url);
     setSaved(true);
+    return url;
+  };
+
+  const sharePrediction = async () => {
+    return createShareUrl();
   };
 
   const generateShareUrl = () => {
-    const encoded = serializePredictionState({ ...state, championTeamId });
-    const url = `${window.location.origin}/predict/share?p=${encoded}`;
-    setShareUrl(url);
+    createShareUrl();
   };
 
   const resetAll = () => {
@@ -147,26 +153,26 @@ export default function PredictPage() {
   };
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white">
       <PageHeader />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="inline-flex rounded-full bg-[#f2f9ff] px-3 py-1 text-xs font-semibold tracking-[0.125px] text-[#097fe8]">
+              <p className="inline-flex rounded-full bg-[#e2f6d5] px-4 py-2 text-sm font-semibold tracking-[-0.108px] text-[#163300]">
                 Previsão da Copa
               </p>
-              <h1 className="mt-3 text-[32px] font-bold leading-tight tracking-[-0.8px] text-[rgba(0,0,0,0.95)] sm:text-[48px] sm:leading-none sm:tracking-[-1.5px]">
+              <h1 className="wise-display mt-4 text-[48px] leading-[0.85] text-[#0e0f0c] sm:text-[72px]">
                 Seu caminho até a taça
               </h1>
-              <p className="mt-3 max-w-2xl text-base leading-6 text-[#615d59]">
+              <p className="mt-4 max-w-2xl text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
                 Escolha dois classificados por grupo e depois avance o mata-mata até o campeão.
               </p>
             </div>
             {saved ? (
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#f2f9ff] px-3 py-2 text-sm font-semibold text-[#097fe8]">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#e2f6d5] px-4 py-2 text-sm font-semibold tracking-[-0.108px] text-[#163300]">
                 <CheckCircle2 className="size-4" />
-                Salvo localmente
+                Link pronto
               </div>
             ) : null}
           </div>
@@ -193,7 +199,7 @@ export default function PredictPage() {
             </div>
             <Card>
               <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
                   {groupStageComplete
                     ? "Todos os classificados foram escolhidos. O mata-mata está pronto."
                     : "Escolha o 1º e o 2º colocado de todos os grupos para liberar o mata-mata."}
@@ -222,7 +228,7 @@ export default function PredictPage() {
                 />
                 <Card>
                   <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
                       {knockoutComplete
                         ? "O campeão está definido. Revise sua previsão completa."
                         : "Escolha os vencedores até a final para completar o torneio."}
@@ -241,8 +247,8 @@ export default function PredictPage() {
             ) : (
               <Card>
                 <CardContent className="p-5">
-                  <h2 className="text-[22px] font-bold leading-tight tracking-[-0.25px]">Grupos primeiro</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <h2 className="wise-display text-[40px] leading-[0.85]">Grupos primeiro</h2>
+                  <p className="mt-3 text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
                     Escolha os dois classificados de todos os grupos antes de abrir o chaveamento.
                   </p>
                   <Button className="mt-4" type="button" onClick={() => setStep(0)}>
@@ -258,7 +264,7 @@ export default function PredictPage() {
           <section className="space-y-5">
             <ShareActions
               shareUrl={shareUrl}
-              onSave={savePrediction}
+              onShare={sharePrediction}
               onGenerateShareUrl={generateShareUrl}
               onReset={resetAll}
             />

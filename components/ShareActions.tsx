@@ -1,34 +1,65 @@
 "use client";
 
 import Link from "next/link";
-import { Copy, Save, RotateCcw, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { Copy, RotateCcw, ExternalLink, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ShareActionsProps = {
   shareUrl: string;
-  onSave: () => void;
+  onShare: () => Promise<string>;
   onGenerateShareUrl: () => void;
   onReset: () => void;
 };
 
 export function ShareActions({
   shareUrl,
-  onSave,
+  onShare,
   onGenerateShareUrl,
   onReset
 }: ShareActionsProps) {
+  const [copied, setCopied] = useState(false);
+
   const copyShareUrl = async () => {
     if (shareUrl && navigator.clipboard) {
       await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+    }
+  };
+
+  const sharePrediction = async () => {
+    let url = "";
+
+    try {
+      url = await onShare();
+      if (navigator.share) {
+        await navigator.share({
+          title: "Minha previsão da Copa 2026",
+          text: "Veja meu caminho previsto para a Copa 2026.",
+          url
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      if (url && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+      }
     }
   };
 
   return (
-    <div className="rounded-xl border border-[rgba(0,0,0,0.1)] bg-white p-4 shadow-[rgba(0,0,0,0.04)_0px_4px_18px,rgba(0,0,0,0.027)_0px_2px_8px,rgba(0,0,0,0.02)_0px_1px_3px]">
+    <div className="rounded-[30px] bg-white p-4 shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px]">
       <div className="grid gap-2 sm:grid-cols-3">
-        <Button type="button" onClick={onSave}>
-          <Save className="mr-2 size-4" />
-          Salvar previsão
+        <Button type="button" onClick={sharePrediction}>
+          <Share2 className="mr-2 size-4" />
+          Compartilhar previsão
         </Button>
         <Button type="button" variant="secondary" onClick={onGenerateShareUrl}>
           <Copy className="mr-2 size-4" />
@@ -40,8 +71,13 @@ export function ShareActions({
         </Button>
       </div>
       {shareUrl ? (
-        <div className="mt-4 space-y-3 rounded border border-[rgba(0,0,0,0.1)] bg-[#f6f5f4] p-3">
-          <p className="break-all text-sm text-[#615d59]">{shareUrl}</p>
+        <div className="mt-4 space-y-3 rounded-[20px] bg-[#e8ebe6] p-4">
+          <p className="break-all text-sm font-semibold tracking-[-0.108px] text-[#454745]">{shareUrl}</p>
+          {copied ? (
+            <p className="text-sm font-semibold tracking-[-0.108px] text-[#054d28]">
+              Link copiado.
+            </p>
+          ) : null}
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button type="button" variant="outline" onClick={copyShareUrl}>
               Copiar link

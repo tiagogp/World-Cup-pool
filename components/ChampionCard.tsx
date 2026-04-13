@@ -7,16 +7,16 @@ type ChampionCardProps = {
 
 export function ChampionCard({ championTeamId }: ChampionCardProps) {
   return (
-    <section className="rounded-2xl border border-[rgba(0,0,0,0.1)] bg-white p-5 text-[rgba(0,0,0,0.95)] shadow-[rgba(0,0,0,0.04)_0px_4px_18px,rgba(0,0,0,0.027)_0px_2px_8px,rgba(0,0,0,0.02)_0px_1px_3px]">
+    <section className="rounded-[40px] bg-[#0e0f0c] p-6 text-white">
       <div className="flex items-center gap-4">
-        <div className="grid size-12 shrink-0 place-items-center rounded bg-[#0075de] text-white">
+        <div className="grid size-12 shrink-0 place-items-center rounded-full bg-[#9fe870] text-[#163300]">
           <Trophy className="size-6" />
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.125px] text-[#097fe8]">
+          <p className="text-sm font-semibold tracking-[-0.108px] text-[#9fe870]">
             Campeão previsto
           </p>
-          <h2 className="mt-1 text-[26px] font-bold leading-tight tracking-[-0.625px]">
+          <h2 className="wise-display mt-2 text-[40px] leading-[0.85]">
             {championTeamId ? <TeamLabel teamId={championTeamId} /> : "Aguardando a final"}
           </h2>
         </div>

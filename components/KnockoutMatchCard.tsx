@@ -13,18 +13,18 @@ export function KnockoutMatchCard({ match, onWinnerSelect, readOnly }: KnockoutM
   const blocked = !match.homeTeamId || !match.awayTeamId;
 
   return (
-    <article className="rounded-xl border border-[rgba(0,0,0,0.1)] bg-white p-3 shadow-[rgba(0,0,0,0.04)_0px_4px_18px,rgba(0,0,0,0.027)_0px_2px_8px,rgba(0,0,0,0.02)_0px_1px_3px]">
+    <article className="relative z-10 w-full min-w-0 max-w-full overflow-hidden rounded-[24px] bg-white p-3 shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px]">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold tracking-[0.125px] text-[#615d59]">
+        <p className="text-xs font-semibold tracking-[-0.108px] text-[#868685]">
           {match.label}
         </p>
         {match.winnerTeamId ? (
-          <span className="rounded-full bg-[#f2f9ff] px-2 py-1 text-xs font-semibold tracking-[0.125px] text-[#097fe8]">
+          <span className="rounded-full bg-[#e2f6d5] px-2 py-1 text-xs font-semibold tracking-[-0.108px] text-[#163300]">
             definido
           </span>
         ) : null}
       </div>
-      <div className="space-y-2">
+      <div className="min-w-0 space-y-2">
         <WinnerSelector
           teamId={match.homeTeamId}
           selected={match.winnerTeamId === match.homeTeamId}

@@ -4,20 +4,20 @@
 
 :root {
   --background: 0 0% 100%;
-  --foreground: 30 2% 5%;
+  --foreground: 60 9% 5%;
   --card: 0 0% 100%;
-  --card-foreground: 30 2% 5%;
-  --muted: 30 10% 96%;
-  --muted-foreground: 28 4% 36%;
-  --border: 0 0% 0% / 0.1;
+  --card-foreground: 60 9% 5%;
+  --muted: 100 12% 91%;
+  --muted-foreground: 60 1% 53%;
+  --border: 60 9% 5% / 0.12;
   --input: 0 0% 87%;
-  --primary: 208 100% 44%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 30 7% 95%;
-  --secondary-foreground: 30 2% 5%;
+  --primary: 99 71% 67%;
+  --primary-foreground: 94 100% 10%;
+  --secondary: 94 100% 10% / 0.08;
+  --secondary-foreground: 60 9% 5%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
-  --ring: 208 92% 47%;
+  --ring: 99 71% 67%;
 }
 
 * {
@@ -26,9 +26,12 @@
 
 body {
   min-height: 100vh;
-  background: #ffffff;
+  background:
+    radial-gradient(circle at 18% -10%, rgba(159, 232, 112, 0.35), transparent 28rem),
+    #ffffff;
   color: hsl(var(--foreground));
-  font-feature-settings: "lnum", "locl";
+  font-family: var(--font-body), Inter, Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "calt";
 }
 
 button,
@@ -36,9 +39,15 @@ input {
   font: inherit;
 }
 
+.wise-display {
+  font-family: var(--font-display), var(--font-body), Inter, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
 .pitch-grid {
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
-  background-size: 32px 32px;
+    linear-gradient(rgba(14, 15, 12, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 15, 12, 0.045) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

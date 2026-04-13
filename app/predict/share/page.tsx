@@ -39,17 +39,17 @@ function SharePageContent() {
   const championTeamId = getChampionTeamId(bracket);
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white">
       <PageHeader />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <p className="inline-flex rounded-full bg-[#f2f9ff] px-3 py-1 text-xs font-semibold tracking-[0.125px] text-[#097fe8]">
+          <p className="inline-flex rounded-full bg-[#e2f6d5] px-4 py-2 text-sm font-semibold tracking-[-0.108px] text-[#163300]">
             Previsão compartilhada
           </p>
-          <h1 className="mt-3 text-[32px] font-bold leading-tight tracking-[-0.8px] text-[rgba(0,0,0,0.95)] sm:text-[48px] sm:leading-none sm:tracking-[-1.5px]">
+          <h1 className="wise-display mt-4 text-[48px] leading-[0.85] text-[#0e0f0c] sm:text-[72px]">
             Caminho do torneio
           </h1>
-          <p className="mt-3 max-w-2xl text-base leading-6 text-[#615d59]">
+          <p className="mt-4 max-w-2xl text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
             Esta previsão veio codificada diretamente no link.
           </p>
         </div>
@@ -64,9 +64,9 @@ function SharePageContent() {
         ) : (
           <Card>
             <CardContent className="p-6">
-              <AlertTriangle className="size-8 text-[#0075de]" />
-              <h2 className="mt-4 text-xl font-bold">Este link não tem uma previsão</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <AlertTriangle className="size-8 text-[#d03238]" />
+              <h2 className="wise-display mt-4 text-[40px] leading-[0.85]">Este link não tem uma previsão</h2>
+              <p className="mt-3 text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
                 Abra um link gerado pelo fluxo de compartilhamento ou comece uma nova previsão.
               </p>
               <Button asChild className="mt-5">
@@ -84,11 +84,11 @@ export default function SharePage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen">
+        <main className="min-h-screen bg-white">
           <PageHeader />
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <Card>
-              <CardContent className="p-6 text-sm text-muted-foreground">
+              <CardContent className="p-6 text-sm text-[#3d3d3d]">
                 Carregando previsão compartilhada...
               </CardContent>
             </Card>

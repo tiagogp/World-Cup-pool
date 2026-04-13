@@ -38,6 +38,34 @@ export function getInitialPredictionState(): PredictionState {
   };
 }
 
+function normalizeGroupPicks(groupPicks: Partial<Record<string, GroupPick>>) {
+  const emptyGroupPicks = createEmptyGroupPicks();
+
+  return Object.fromEntries(
+    groups.map((group) => {
+      const pick = groupPicks[group.code];
+      const validTeamIds = new Set(group.teamIds);
+      const firstTeamId =
+        pick?.firstTeamId && validTeamIds.has(pick.firstTeamId) ? pick.firstTeamId : null;
+      const secondTeamId =
+        pick?.secondTeamId &&
+        validTeamIds.has(pick.secondTeamId) &&
+        pick.secondTeamId !== firstTeamId
+          ? pick.secondTeamId
+          : null;
+
+      return [
+        group.code,
+        {
+          ...emptyGroupPicks[group.code],
+          firstTeamId,
+          secondTeamId
+        }
+      ];
+    })
+  ) as Record<string, GroupPick>;
+}
+
 export function getQualifiersByGroup(
   groupPicks: Record<string, GroupPick>
 ): Record<string, GroupQualifier[]> {
@@ -224,11 +252,12 @@ export function deserializePredictionState(value: string | null): PredictionStat
       return null;
     }
 
-    const qualifiersByGroup = getQualifiersByGroup(parsed.groupPicks);
+    const groupPicks = normalizeGroupPicks(parsed.groupPicks);
+    const qualifiersByGroup = getQualifiersByGroup(groupPicks);
     const bracket = advanceKnockoutWinners(qualifiersByGroup, parsed.knockoutSelections);
 
     return {
-      groupPicks: parsed.groupPicks,
+      groupPicks,
       knockoutSelections: parsed.knockoutSelections,
       championTeamId: getChampionTeamId(bracket)
     };

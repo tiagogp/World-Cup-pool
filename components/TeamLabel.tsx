@@ -15,10 +15,10 @@ export function TeamLabel({ teamId, muted }: TeamLabelProps) {
   }
 
   return (
-    <span className={cn("inline-flex items-center gap-2", muted && "text-muted-foreground")}>
+    <span className={cn("inline-flex w-full min-w-0 items-center gap-2", muted && "text-muted-foreground")}>
       <CountryFlag code={team.flagCode} title={team.name} />
-      <span>{team.name}</span>
-      <span className="hidden text-xs text-muted-foreground sm:inline">{team.shortName}</span>
+      <span className="min-w-0 truncate">{team.name}</span>
+      <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{team.shortName}</span>
     </span>
   );
 }
