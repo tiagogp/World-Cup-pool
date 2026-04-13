@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Bolão da Copa 2026">
-  <rect width="192" height="192" rx="54" fill="#9fe870"/>
-  <path d="M58 48h48c31 0 49 14 49 39 0 14-8 25-21 31 15 6 24 18 24 35 0 27-20 43-52 43H58V48z" fill="#0e0f0c"/>
-  <path d="M89 75v31h17c13 0 20-6 20-16s-7-15-20-15H89zM89 131v34h19c14 0 22-6 22-17s-8-17-22-17H89z" fill="#9fe870"/>
-  <circle cx="52" cy="46" r="22" fill="#ffffff"/>
-  <path d="M52 29l10 7v20l-10 7-10-7V36l10-7z" fill="#0e0f0c"/>
-  <path d="M37 47h8M59 47h8M44 34l5 6M60 34l-5 6M44 60l5-6M60 60l-5-6" stroke="#0e0f0c" stroke-width="3.5" stroke-linecap="round"/>
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="100" height="100" fill="#AEE57F"/>
+<path d="M66.4048 27.0625C66.4048 27.0625 68.0806 24.7188 71.5938 24.7188C74.8212 24.7188 78.6251 27.1797 78.6251 31.75C78.6251 39.2734 66.9063 41.6922 66.9063 50.5C66.9063 52.8016 69.2501 55.1711 69.2501 55.1711" stroke="#1D3208" stroke-width="4" stroke-miterlimit="10" stroke-linejoin="round"/>
+<path d="M31.75 55.1711C31.75 55.1711 34.0937 52.8016 34.0937 50.5C34.0937 41.6922 22.375 39.2734 22.375 31.75C22.375 27.1797 26.1789 24.7188 29.4062 24.7188C32.9172 24.7188 34.5953 27.0625 34.5953 27.0625" stroke="#1D3208" stroke-width="4" stroke-miterlimit="10" stroke-linejoin="round"/>
+<path d="M34.0938 27.0625C34.0938 42.3625 42.7398 66.9062 50.4602 66.9062C58.1805 66.9062 66.9062 42.4562 66.9062 27.0625H34.0938Z" stroke="#1D3208" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M55.1875 69.25H45.8125C41.9289 69.25 38.7812 72.3977 38.7812 76.2812H62.2188C62.2188 72.3977 59.0711 69.25 55.1875 69.25Z" stroke="#1D3208" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M50.5 48.1562V36.4375" stroke="#1D3208" stroke-width="4" stroke-miterlimit="10"/>
 </svg>

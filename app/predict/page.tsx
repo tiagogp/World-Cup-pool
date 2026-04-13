@@ -13,6 +13,8 @@ import { GroupCard } from "@/components/GroupCard";
 import { KnockoutBracket } from "@/components/KnockoutBracket";
 import { ReviewSummary } from "@/components/ReviewSummary";
 import { ShareActions } from "@/components/ShareActions";
+import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
+import { addTeamToGroupPick, removeTeamFromGroupPick } from "@/lib/group-picks";
 import {
   advanceKnockoutWinners,
   areGroupPredictionsComplete,
@@ -21,36 +23,7 @@ import {
   getQualifiersByGroup,
   serializePredictionState
 } from "@/lib/predictions";
-import type { GroupPick, PredictionState } from "@/types/predictions";
-
-function addTeamToGroupPick(pick: GroupPick, teamId: string): GroupPick {
-  if (pick.firstTeamId === teamId || pick.secondTeamId === teamId) {
-    return pick;
-  }
-
-  if (!pick.firstTeamId) {
-    return { ...pick, firstTeamId: teamId };
-  }
-
-  if (!pick.secondTeamId) {
-    return { ...pick, secondTeamId: teamId };
-  }
-
-  return pick;
-}
-
-function removeTeamFromGroupPick(pick: GroupPick, teamId: string): GroupPick {
-  const remaining = [pick.firstTeamId, pick.secondTeamId].filter(
-    (selectedTeamId): selectedTeamId is string =>
-      Boolean(selectedTeamId) && selectedTeamId !== teamId
-  );
-
-  return {
-    ...pick,
-    firstTeamId: remaining[0] ?? null,
-    secondTeamId: remaining[1] ?? null
-  };
-}
+import type { PredictionState } from "@/types/predictions";
 
 export default function PredictPage() {
   const router = useRouter();
@@ -341,24 +314,10 @@ export default function PredictPage() {
         ) : null}
       </div>
       {pendingNavigationUrl ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-[#0e0f0c]/55 px-4">
-          <div className="w-full max-w-md rounded-[30px] bg-white p-6 shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px]">
-            <h2 className="wise-display text-[40px] leading-[0.85] text-[#0e0f0c]">
-              Sair do bolão?
-            </h2>
-            <p className="mt-4 text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
-              Sua previsão ainda não foi compartilhada. Se sair agora, essas escolhas serão perdidas.
-            </p>
-            <div className="mt-6 grid gap-2 sm:grid-cols-2">
-              <Button type="button" variant="secondary" onClick={() => setPendingNavigationUrl(null)}>
-                Continuar editando
-              </Button>
-              <Button type="button" onClick={leaveWithoutSaving}>
-                Sair mesmo assim
-              </Button>
-            </div>
-          </div>
-        </div>
+        <UnsavedChangesDialog
+          onCancel={() => setPendingNavigationUrl(null)}
+          onConfirm={leaveWithoutSaving}
+        />
       ) : null}
       <PageFooter />
     </main>

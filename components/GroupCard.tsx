@@ -63,7 +63,7 @@ export function GroupCard({
                       : onTeamToggle?.(group.code, teamId)
                   }
                   className={cn(
-                    "flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left text-[18px] font-semibold tracking-[-0.108px] transition-transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#163300] [&_.text-muted-foreground]:text-current/60",
+                    "flex min-h-12 w-full items-center justify-between gap-2 rounded-2xl px-3 py-3 text-left text-[16px] font-semibold tracking-[-0.108px] transition-transform hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#163300] sm:gap-3 sm:px-4 sm:text-[18px] [&_.text-muted-foreground]:text-current/60",
                     selected
                       ? "bg-[#9fe870] text-[#163300]"
                       : "bg-white text-[#0e0f0c] shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px] hover:bg-[#e2f6d5]",
@@ -71,13 +71,13 @@ export function GroupCard({
                       "cursor-not-allowed bg-[#e8ebe6] text-[#868685] opacity-70 hover:scale-100 hover:bg-[#e8ebe6]",
                   )}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     {selected ? (
-                      <span className="gap-1 text-xs font-semibold tracking-[-0.108px]">
+                      <span className="shrink-0 gap-1 text-xs font-semibold tracking-[-0.108px]">
                         {selectedIndex === 0 ? "1º" : "2º"}
                       </span>
                     ) : null}
-                    <TeamLabel teamId={teamId} />
+                    <TeamLabel teamId={teamId} strongCode={selected} />
                   </div>
                   {selected ? (
                     <span className="inline-flex items-center gap-1 text-xs font-semibold tracking-[-0.108px]">

@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export const alt = "Bolão da Copa 2026 - simulador de chaves";
 export const size = {
@@ -9,7 +11,25 @@ export const size = {
 };
 export const contentType = "image/png";
 
-export default function Image() {
+const archivoBlack = readFile(
+  join(process.cwd(), "node_modules/@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff")
+);
+
+const interSemiBold = readFile(
+  join(process.cwd(), "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff")
+);
+
+const interBold = readFile(
+  join(process.cwd(), "node_modules/@fontsource/inter/files/inter-latin-700-normal.woff")
+);
+
+export default async function Image() {
+  const [archivoBlackData, interSemiBoldData, interBoldData] = await Promise.all([
+    archivoBlack,
+    interSemiBold,
+    interBold
+  ]);
+
   return new ImageResponse(
     (
       <div
@@ -19,7 +39,7 @@ export default function Image() {
           display: "flex",
           background: "#ffffff",
           color: "#0e0f0c",
-          fontFamily: "Arial, Helvetica, sans-serif",
+          fontFamily: "Inter",
           padding: 64,
           position: "relative",
           overflow: "hidden"
@@ -63,6 +83,7 @@ export default function Image() {
               gap: 18,
               fontSize: 30,
               fontWeight: 700,
+              fontFamily: "Inter",
               letterSpacing: -1
             }}
           >
@@ -102,7 +123,8 @@ export default function Image() {
                 color: "#163300",
                 padding: "12px 24px",
                 fontSize: 28,
-                fontWeight: 700
+                fontWeight: 700,
+                fontFamily: "Inter"
               }}
             >
               Simulador de chaves
@@ -114,7 +136,8 @@ export default function Image() {
                 fontSize: 94,
                 lineHeight: 0.88,
                 letterSpacing: -4,
-                fontWeight: 900
+                fontWeight: 400,
+                fontFamily: "Archivo Black"
               }}
             >
               Monte sua previsão e compartilhe o campeão.
@@ -127,6 +150,7 @@ export default function Image() {
               gap: 14,
               fontSize: 26,
               fontWeight: 700,
+              fontFamily: "Inter",
               color: "#454745"
             }}
           >
@@ -139,6 +163,28 @@ export default function Image() {
         </div>
       </div>
     ),
-    size
+    {
+      ...size,
+      fonts: [
+        {
+          name: "Archivo Black",
+          data: archivoBlackData,
+          style: "normal",
+          weight: 400
+        },
+        {
+          name: "Inter",
+          data: interSemiBoldData,
+          style: "normal",
+          weight: 600
+        },
+        {
+          name: "Inter",
+          data: interBoldData,
+          style: "normal",
+          weight: 700
+        }
+      ]
+    }
   );
 }

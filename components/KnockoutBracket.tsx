@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CountryFlag } from "@/components/CountryFlag";
 import { KnockoutMatchCard } from "@/components/KnockoutMatchCard";
@@ -14,14 +15,27 @@ const roundLabels: Record<KnockoutRound, string> = {
   quarterfinal: "Quartas",
   semifinal: "Semifinais",
   thirdPlace: "3º lugar",
-  final: "Final"
+  final: "Final",
 };
 
-const rowStarts: Record<"roundOf24" | "roundOf16" | "quarterfinal" | "semifinal", string[]> = {
-  roundOf24: ["lg:row-start-1", "lg:row-start-5", "lg:row-start-9", "lg:row-start-13"],
-  roundOf16: ["lg:row-start-1", "lg:row-start-5", "lg:row-start-9", "lg:row-start-13"],
+const rowStarts: Record<
+  "roundOf24" | "roundOf16" | "quarterfinal" | "semifinal",
+  string[]
+> = {
+  roundOf24: [
+    "lg:row-start-1",
+    "lg:row-start-5",
+    "lg:row-start-9",
+    "lg:row-start-13",
+  ],
+  roundOf16: [
+    "lg:row-start-1",
+    "lg:row-start-5",
+    "lg:row-start-9",
+    "lg:row-start-13",
+  ],
   quarterfinal: ["lg:row-start-3", "lg:row-start-11"],
-  semifinal: ["lg:row-start-7"]
+  semifinal: ["lg:row-start-7"],
 };
 
 type KnockoutBracketProps = {
@@ -33,22 +47,42 @@ type KnockoutBracketProps = {
 
 type BracketSide = "left" | "right";
 type SideRound = "roundOf24" | "roundOf16" | "quarterfinal" | "semifinal";
+type BracketPath = {
+  id: string;
+  d: string;
+};
 
-const leftRounds: SideRound[] = ["roundOf24", "roundOf16", "quarterfinal", "semifinal"];
-const rightRounds: SideRound[] = ["roundOf24", "roundOf16", "quarterfinal", "semifinal"];
+const leftRounds: SideRound[] = [
+  "roundOf24",
+  "roundOf16",
+  "quarterfinal",
+  "semifinal",
+];
+const rightRounds: SideRound[] = [
+  "roundOf24",
+  "roundOf16",
+  "quarterfinal",
+  "semifinal",
+];
 
-function sideMatches(matches: KnockoutMatch[], round: SideRound, side: BracketSide) {
+function sideMatches(
+  matches: KnockoutMatch[],
+  round: SideRound,
+  side: BracketSide,
+) {
   const roundMatches = matches.filter((match) => match.round === round);
   const splitAt = Math.ceil(roundMatches.length / 2);
 
-  return side === "left" ? roundMatches.slice(0, splitAt) : roundMatches.slice(splitAt);
+  return side === "left"
+    ? roundMatches.slice(0, splitAt)
+    : roundMatches.slice(splitAt);
 }
 
 export function KnockoutBracket({
   matches,
   championTeamId,
   onWinnerSelect,
-  readOnly
+  readOnly,
 }: KnockoutBracketProps) {
   const finalMatch = matches.find((match) => match.round === "final");
   const thirdPlaceMatch = matches.find((match) => match.round === "thirdPlace");
@@ -67,9 +101,11 @@ export function KnockoutBracket({
           <div className="grid gap-4 lg:self-center">
             <ChampionCenter championTeamId={championTeamId} />
             {finalMatch ? (
-              <div className="rounded-[30px] bg-[#0e0f0c] p-3 text-white">
+              <div className="rounded-[30px] bg-white p-3 border">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="wise-display text-[32px] leading-[0.85]">Final</h3>
+                  <h3 className="wise-display text-[32px] leading-[0.85]">
+                    Final
+                  </h3>
                   <span className="rounded-full bg-[#9fe870] px-3 py-1 text-xs font-semibold text-[#163300]">
                     decisão
                   </span>
@@ -121,18 +157,157 @@ type BracketSideProps = {
   readOnly?: boolean;
 };
 
-function BracketSide({ side, matches, onWinnerSelect, readOnly }: BracketSideProps) {
+function BracketSide({
+  side,
+  matches,
+  onWinnerSelect,
+  readOnly,
+}: BracketSideProps) {
   const rounds = side === "left" ? leftRounds : rightRounds;
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const matchRefs = useRef(new Map<string, HTMLDivElement>());
+  const [paths, setPaths] = useState<BracketPath[]>([]);
+
+  const visibleMatchIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    rounds.forEach((round) => {
+      sideMatches(matches, round, side).forEach((match) => ids.add(match.id));
+    });
+
+    return ids;
+  }, [matches, rounds, side]);
+
+  const connections = useMemo(() => {
+    return matches.flatMap((match) => {
+      if (!visibleMatchIds.has(match.id)) {
+        return [];
+      }
+
+      return [match.source.home, match.source.away].flatMap((source) => {
+        if (source.type !== "winner" || !visibleMatchIds.has(source.matchId)) {
+          return [];
+        }
+
+        return [
+          {
+            from: source.matchId,
+            to: match.id,
+          },
+        ];
+      });
+    });
+  }, [matches, visibleMatchIds]);
+
+  const setMatchRef = useCallback(
+    (matchId: string, element: HTMLDivElement | null) => {
+      if (element) {
+        matchRefs.current.set(matchId, element);
+        return;
+      }
+
+      matchRefs.current.delete(matchId);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const drawConnections = () => {
+      const containerRect = container.getBoundingClientRect();
+
+      setPaths(
+        connections.flatMap((connection) => {
+          const fromElement = matchRefs.current.get(connection.from);
+          const toElement = matchRefs.current.get(connection.to);
+
+          if (!fromElement || !toElement) {
+            return [];
+          }
+
+          const fromRect = fromElement.getBoundingClientRect();
+          const toRect = toElement.getBoundingClientRect();
+          const fromX =
+            side === "left"
+              ? fromRect.right - containerRect.left
+              : fromRect.left - containerRect.left;
+          const toX =
+            side === "left"
+              ? toRect.left - containerRect.left
+              : toRect.right - containerRect.left;
+          const fromY = fromRect.top - containerRect.top + fromRect.height / 2;
+          const toY = toRect.top - containerRect.top + toRect.height / 2;
+          const midX = fromX + (toX - fromX) / 2;
+
+          return [
+            {
+              id: `${connection.from}-${connection.to}`,
+              d: `M ${fromX} ${fromY} H ${midX} V ${toY} H ${toX}`,
+            },
+          ];
+        }),
+      );
+    };
+
+    const animationFrame = window.requestAnimationFrame(drawConnections);
+    const resizeObserver = new ResizeObserver(drawConnections);
+    resizeObserver.observe(container);
+    matchRefs.current.forEach((element) => resizeObserver.observe(element));
+    window.addEventListener("resize", drawConnections);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", drawConnections);
+    };
+  }, [connections, matches, side]);
 
   return (
-    <div className={cn("grid gap-4 lg:grid-cols-4", side === "right" && "lg:[direction:rtl]")}>
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative grid gap-4 lg:grid-cols-4",
+        side === "right" && "lg:[direction:rtl]",
+      )}
+    >
+      <svg
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 hidden h-full w-full overflow-visible lg:block"
+      >
+        {paths.map((path) => (
+          <path
+            key={path.id}
+            d={path.d}
+            fill="none"
+            className="stroke-border"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ))}
+      </svg>
       {rounds.map((round) => {
         const roundMatches = sideMatches(matches, round, side);
 
         return (
-          <section key={`${side}-${round}`} className="min-w-0 lg:[direction:ltr]">
-            <div className={cn("mb-3 flex items-center gap-2", side === "right" && "lg:justify-end")}>
-              <h3 className="wise-display text-[28px] leading-[0.85]">{roundLabels[round]}</h3>
+          <section
+            key={`${side}-${round}`}
+            className="min-w-0 lg:[direction:ltr]"
+          >
+            <div
+              className={cn(
+                "mb-3 flex items-center gap-2",
+                side === "right" && "lg:justify-end",
+              )}
+            >
+              <h3 className="wise-display text-[28px] leading-[0.85]">
+                {roundLabels[round]}
+              </h3>
               <span className="rounded-full bg-[#e2f6d5] px-2 py-1 text-xs font-semibold text-[#163300]">
                 {roundMatches.length}
               </span>
@@ -141,13 +316,10 @@ function BracketSide({ side, matches, onWinnerSelect, readOnly }: BracketSidePro
               {roundMatches.map((match, index) => (
                 <div
                   key={match.id}
+                  ref={(element) => setMatchRef(match.id, element)}
                   className={cn(
-                    "relative min-w-0 lg:row-span-3",
+                    "relative z-10 min-w-0 lg:row-span-3",
                     rowStarts[round][index],
-                    side === "left" &&
-                      "after:absolute after:left-full after:top-1/2 after:hidden after:h-px after:w-4 after:bg-[rgba(14,15,12,0.22)] after:content-[''] lg:after:block",
-                    side === "right" &&
-                      "after:absolute after:right-full after:top-1/2 after:hidden after:h-px after:w-4 after:bg-[rgba(14,15,12,0.22)] after:content-[''] lg:after:block"
                   )}
                 >
                   <ClassicMatch
@@ -173,7 +345,12 @@ type ClassicMatchProps = {
   readOnly?: boolean;
 };
 
-function ClassicMatch({ match, side, onWinnerSelect, readOnly }: ClassicMatchProps) {
+function ClassicMatch({
+  match,
+  side,
+  onWinnerSelect,
+  readOnly,
+}: ClassicMatchProps) {
   const blocked = !match.homeTeamId || !match.awayTeamId;
 
   return (
@@ -181,7 +358,7 @@ function ClassicMatch({ match, side, onWinnerSelect, readOnly }: ClassicMatchPro
       <p
         className={cn(
           "mb-2 px-2 text-xs font-semibold tracking-[-0.108px] text-[#868685]",
-          side === "right" && "lg:text-right"
+          side === "right" && "lg:text-right",
         )}
       >
         {match.label}
@@ -192,14 +369,18 @@ function ClassicMatch({ match, side, onWinnerSelect, readOnly }: ClassicMatchPro
           selected={match.winnerTeamId === match.homeTeamId}
           disabled={readOnly || blocked}
           side={side}
-          onSelect={() => match.homeTeamId && onWinnerSelect?.(match.id, match.homeTeamId)}
+          onSelect={() =>
+            match.homeTeamId && onWinnerSelect?.(match.id, match.homeTeamId)
+          }
         />
         <TeamNode
           teamId={match.awayTeamId}
           selected={match.winnerTeamId === match.awayTeamId}
           disabled={readOnly || blocked}
           side={side}
-          onSelect={() => match.awayTeamId && onWinnerSelect?.(match.id, match.awayTeamId)}
+          onSelect={() =>
+            match.awayTeamId && onWinnerSelect?.(match.id, match.awayTeamId)
+          }
         />
       </div>
     </article>
@@ -214,7 +395,13 @@ type TeamNodeProps = {
   onSelect: () => void;
 };
 
-function TeamNode({ teamId, selected, disabled, side, onSelect }: TeamNodeProps) {
+function TeamNode({
+  teamId,
+  selected,
+  disabled,
+  side,
+  onSelect,
+}: TeamNodeProps) {
   const team = getTeam(teamId);
   const isRight = side === "right";
 
@@ -226,8 +413,11 @@ function TeamNode({ teamId, selected, disabled, side, onSelect }: TeamNodeProps)
       className={cn(
         "grid min-h-12 w-full min-w-0 grid-cols-[40px_1fr] items-center gap-2 rounded-full px-2 py-1 text-left transition-transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#163300]",
         isRight && "lg:grid-cols-[1fr_40px]",
-        selected ? "bg-[#9fe870] text-[#163300]" : "bg-[#e8ebe6] text-[#0e0f0c]",
-        (disabled || !teamId) && "cursor-not-allowed opacity-65 hover:scale-100"
+        selected
+          ? "bg-[#9fe870] text-[#163300]"
+          : "bg-[#e8ebe6] text-[#0e0f0c]",
+        (disabled || !teamId) &&
+          "cursor-not-allowed opacity-65 hover:scale-100",
       )}
     >
       {!isRight ? <FlagBubble teamId={teamId} /> : null}
@@ -266,7 +456,11 @@ function ChampionCenter({ championTeamId }: { championTeamId: string | null }) {
       </div>
       <p className="mt-4 text-sm font-semibold tracking-[-0.108px]">Campeão</p>
       <div className="mt-2 flex justify-center text-[18px] font-semibold tracking-[-0.108px]">
-        {championTeamId ? <TeamLabel teamId={championTeamId} /> : "Aguardando final"}
+        {championTeamId ? (
+          <TeamLabel teamId={championTeamId} />
+        ) : (
+          "Aguardando final"
+        )}
       </div>
     </div>
   );
