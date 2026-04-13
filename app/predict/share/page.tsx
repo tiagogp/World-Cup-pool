@@ -43,12 +43,14 @@ function SharePageContent() {
       <PageHeader />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">
-            Shared prediction
+          <p className="inline-flex rounded-full bg-[#f2f9ff] px-3 py-1 text-xs font-semibold tracking-[0.125px] text-[#097fe8]">
+            Previsão compartilhada
           </p>
-          <h1 className="mt-2 text-3xl font-black sm:text-4xl">Read-only tournament path</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This prediction was encoded directly in the URL.
+          <h1 className="mt-3 text-[32px] font-bold leading-tight tracking-[-0.8px] text-[rgba(0,0,0,0.95)] sm:text-[48px] sm:leading-none sm:tracking-[-1.5px]">
+            Caminho do torneio
+          </h1>
+          <p className="mt-3 max-w-2xl text-base leading-6 text-[#615d59]">
+            Esta previsão veio codificada diretamente no link.
           </p>
         </div>
 
@@ -62,13 +64,13 @@ function SharePageContent() {
         ) : (
           <Card>
             <CardContent className="p-6">
-              <AlertTriangle className="size-8 text-primary" />
-              <h2 className="mt-4 text-xl font-bold">This link is missing a prediction</h2>
+              <AlertTriangle className="size-8 text-[#0075de]" />
+              <h2 className="mt-4 text-xl font-bold">Este link não tem uma previsão</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Open a generated share URL or start a new bracket.
+                Abra um link gerado pelo fluxo de compartilhamento ou comece uma nova previsão.
               </p>
               <Button asChild className="mt-5">
-                <Link href="/predict">Start a prediction</Link>
+                <Link href="/predict">Começar previsão</Link>
               </Button>
             </CardContent>
           </Card>
@@ -87,7 +89,7 @@ export default function SharePage() {
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <Card>
               <CardContent className="p-6 text-sm text-muted-foreground">
-                Loading shared prediction...
+                Carregando previsão compartilhada...
               </CardContent>
             </Card>
           </div>

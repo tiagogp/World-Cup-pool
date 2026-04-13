@@ -19,7 +19,7 @@ export function CountryFlag({ code, title, className }: CountryFlagProps) {
       <span
         aria-label={title}
         className={cn(
-          "grid h-4 w-6 shrink-0 place-items-center rounded-sm border border-border bg-muted text-muted-foreground",
+          "grid h-4 w-6 shrink-0 place-items-center rounded-sm border border-[rgba(0,0,0,0.1)] bg-[#f6f5f4] text-[#615d59]",
           className
         )}
         role="img"
@@ -33,7 +33,7 @@ export function CountryFlag({ code, title, className }: CountryFlagProps) {
     <Flag
       aria-label={title}
       role="img"
-      className={cn("h-4 w-6 shrink-0 rounded-sm object-cover shadow-sm", className)}
+      className={cn("h-4 w-6 shrink-0 rounded-sm object-cover shadow-[rgba(0,0,0,0.08)_0px_1px_2px]", className)}
     />
   );
 }

@@ -7,18 +7,18 @@ import { PageHeader } from "@/components/PageHeader";
 const flow = [
   {
     icon: ListChecks,
-    title: "Pick each group's top two",
-    text: "Choose 1st and 2nd place without entering every match."
+    title: "Escolha os classificados",
+    text: "Clique nos dois times que passam em cada grupo, na ordem de classificação."
   },
   {
     icon: Trophy,
-    title: "Build the bracket",
-    text: "Round of 16 slots are created from the group winners and runners-up."
+    title: "Monte o mata-mata",
+    text: "O chaveamento nasce automaticamente a partir das suas escolhas."
   },
   {
     icon: Share2,
-    title: "Save and share",
-    text: "Keep progress locally or send a full read-only prediction link."
+    title: "Salve e compartilhe",
+    text: "Guarde no navegador ou envie um link com a previsão completa."
   }
 ];
 
@@ -26,18 +26,20 @@ export default function HomePage() {
   return (
     <main className="min-h-screen">
       <PageHeader />
-      <section className="pitch-grid mx-auto flex min-h-[calc(100vh-73px)] max-w-7xl flex-col justify-center px-4 py-10 sm:px-6 lg:px-8">
+      <section className="pitch-grid mx-auto flex min-h-[calc(100vh-69px)] max-w-7xl flex-col justify-center px-4 py-14 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
-          <p className="text-sm font-bold uppercase tracking-[0.24em] text-primary">World Cup picks</p>
-          <h1 className="mt-4 text-4xl font-black tracking-normal sm:text-6xl">
-            Build the tournament you think will happen.
+          <p className="inline-flex rounded-full bg-[#f2f9ff] px-3 py-1 text-xs font-semibold tracking-[0.125px] text-[#097fe8]">
+            Copa do Mundo 2026
+          </p>
+          <h1 className="mt-5 max-w-4xl text-[40px] font-bold leading-[1.04] tracking-[-1.2px] text-[rgba(0,0,0,0.95)] sm:text-[64px] sm:leading-none sm:tracking-[-2.125px]">
+            Monte o caminho da Copa que você acredita.
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Fill the group stage, let the knockout bracket form, choose every winner, and crown a champion.
+          <p className="mt-5 max-w-2xl text-lg font-medium leading-7 text-[#615d59] sm:text-xl">
+            Escolha quem passa dos grupos, avance rodada por rodada e veja o campeão previsto no fim.
           </p>
           <Button asChild size="lg" className="mt-8">
             <Link href="/predict">
-              Start predictions
+              Começar previsão
               <ArrowRight className="ml-2 size-5" />
             </Link>
           </Button>
@@ -45,11 +47,13 @@ export default function HomePage() {
 
         <div className="mt-12 grid gap-4 md:grid-cols-3">
           {flow.map((item) => (
-            <Card key={item.title} className="bg-card/85">
+            <Card key={item.title}>
               <CardContent className="p-5">
-                <item.icon className="size-7 text-primary" />
-                <h2 className="mt-4 text-lg font-bold">{item.title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">{item.text}</p>
+                <item.icon className="size-7 text-[#0075de]" />
+                <h2 className="mt-4 text-[22px] font-bold leading-tight tracking-[-0.25px]">
+                  {item.title}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-[#615d59]">{item.text}</p>
               </CardContent>
             </Card>
           ))}

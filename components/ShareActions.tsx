@@ -24,31 +24,31 @@ export function ShareActions({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-xl border border-[rgba(0,0,0,0.1)] bg-white p-4 shadow-[rgba(0,0,0,0.04)_0px_4px_18px,rgba(0,0,0,0.027)_0px_2px_8px,rgba(0,0,0,0.02)_0px_1px_3px]">
       <div className="grid gap-2 sm:grid-cols-3">
         <Button type="button" onClick={onSave}>
           <Save className="mr-2 size-4" />
-          Save prediction
+          Salvar previsão
         </Button>
         <Button type="button" variant="secondary" onClick={onGenerateShareUrl}>
           <Copy className="mr-2 size-4" />
-          Generate share URL
+          Gerar link
         </Button>
         <Button type="button" variant="outline" onClick={onReset}>
           <RotateCcw className="mr-2 size-4" />
-          Reset all
+          Recomeçar
         </Button>
       </div>
       {shareUrl ? (
-        <div className="mt-4 space-y-3 rounded-md border border-border bg-background/70 p-3">
-          <p className="break-all text-sm text-muted-foreground">{shareUrl}</p>
+        <div className="mt-4 space-y-3 rounded border border-[rgba(0,0,0,0.1)] bg-[#f6f5f4] p-3">
+          <p className="break-all text-sm text-[#615d59]">{shareUrl}</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button type="button" variant="outline" onClick={copyShareUrl}>
-              Copy link
+              Copiar link
             </Button>
             <Button asChild type="button">
               <Link href={shareUrl}>
-                Open shared prediction
+                Abrir previsão
                 <ExternalLink className="ml-2 size-4" />
               </Link>
             </Button>

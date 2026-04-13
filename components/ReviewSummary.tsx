@@ -19,8 +19,10 @@ export function ReviewSummary({
     <div className="space-y-6">
       <section className="space-y-3">
         <div>
-          <h2 className="text-xl font-black">Classificados por grupo</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-[26px] font-bold leading-tight tracking-[-0.625px] text-[rgba(0,0,0,0.95)]">
+            Classificados por grupo
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[#615d59]">
             Suas escolhas de 1º e 2º colocado em cada grupo.
           </p>
         </div>
@@ -37,8 +39,10 @@ export function ReviewSummary({
       </section>
       <section className="space-y-3">
         <div>
-          <h2 className="text-xl font-black">Caminho do mata-mata</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-[26px] font-bold leading-tight tracking-[-0.625px] text-[rgba(0,0,0,0.95)]">
+            Caminho do mata-mata
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[#615d59]">
             O bracket usa os classificados que você escolheu nos grupos.
           </p>
         </div>

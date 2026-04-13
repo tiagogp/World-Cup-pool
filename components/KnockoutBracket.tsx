@@ -5,7 +5,7 @@ import { ChampionCard } from "@/components/ChampionCard";
 import type { KnockoutMatch, KnockoutRound } from "@/types/predictions";
 
 const roundLabels: Record<KnockoutRound, string> = {
-  roundOf24: "Round of 24",
+  roundOf24: "Primeira rodada",
   roundOf16: "Oitavas",
   quarterfinal: "Quartas",
   semifinal: "Semifinais",

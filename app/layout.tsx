@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "World Cup Prediction Builder",
-  description: "Build, save, and share a complete World Cup prediction.",
+  title: "Bolão da Copa 2026",
+  description: "Monte, salve e compartilhe uma previsão da Copa 2026.",
 };
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="pt-BR">
       <body>{children}</body>
     </html>
   );

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-const steps = ["Group Stage", "Knockout Stage", "Review"];
+const steps = ["Grupos", "Mata-mata", "Revisão"];
 
 type StepProgressProps = {
   currentStep: number;
@@ -16,7 +16,7 @@ export function StepProgress({
   canOpenReview
 }: StepProgressProps) {
   return (
-    <nav className="grid grid-cols-3 gap-2">
+    <nav className="grid grid-cols-3 gap-2 rounded-xl border border-[rgba(0,0,0,0.1)] bg-[#f6f5f4] p-1">
       {steps.map((step, index) => {
         const locked = (index === 1 && !canOpenKnockout) || (index === 2 && !canOpenReview);
         return (
@@ -26,15 +26,15 @@ export function StepProgress({
             disabled={locked}
             onClick={() => onStepChange(index)}
             className={cn(
-              "rounded-md border px-3 py-3 text-left text-xs font-semibold transition sm:text-sm",
+              "rounded px-3 py-3 text-left text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#097fe8] sm:text-sm",
               currentStep === index
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-card text-muted-foreground hover:bg-muted",
-              locked && "cursor-not-allowed opacity-45 hover:bg-card"
+                ? "bg-white text-[rgba(0,0,0,0.95)] shadow-[rgba(0,0,0,0.04)_0px_4px_18px,rgba(0,0,0,0.027)_0px_2px_8px]"
+                : "text-[#615d59] hover:bg-white/70",
+              locked && "cursor-not-allowed opacity-45 hover:bg-transparent"
             )}
           >
-            <span className="block text-[10px] uppercase tracking-[0.16em] opacity-75">
-              Step {index + 1}
+            <span className="block text-[10px] uppercase tracking-[0.125px] opacity-75">
+              Etapa {index + 1}
             </span>
             {step}
           </button>

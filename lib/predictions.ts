@@ -87,14 +87,14 @@ const roundOf24Sources: Array<{
   home: KnockoutSource;
   away: KnockoutSource;
 }> = [
-  { id: "r24-1", label: "Round of 24 1", home: { type: "group", groupCode: "I", position: 1 }, away: { type: "group", groupCode: "A", position: 2 } },
-  { id: "r24-2", label: "Round of 24 2", home: { type: "group", groupCode: "J", position: 1 }, away: { type: "group", groupCode: "B", position: 2 } },
-  { id: "r24-3", label: "Round of 24 3", home: { type: "group", groupCode: "K", position: 1 }, away: { type: "group", groupCode: "C", position: 2 } },
-  { id: "r24-4", label: "Round of 24 4", home: { type: "group", groupCode: "L", position: 1 }, away: { type: "group", groupCode: "D", position: 2 } },
-  { id: "r24-5", label: "Round of 24 5", home: { type: "group", groupCode: "E", position: 2 }, away: { type: "group", groupCode: "F", position: 2 } },
-  { id: "r24-6", label: "Round of 24 6", home: { type: "group", groupCode: "G", position: 2 }, away: { type: "group", groupCode: "H", position: 2 } },
-  { id: "r24-7", label: "Round of 24 7", home: { type: "group", groupCode: "I", position: 2 }, away: { type: "group", groupCode: "J", position: 2 } },
-  { id: "r24-8", label: "Round of 24 8", home: { type: "group", groupCode: "K", position: 2 }, away: { type: "group", groupCode: "L", position: 2 } }
+  { id: "r24-1", label: "Jogo 1", home: { type: "group", groupCode: "I", position: 1 }, away: { type: "group", groupCode: "A", position: 2 } },
+  { id: "r24-2", label: "Jogo 2", home: { type: "group", groupCode: "J", position: 1 }, away: { type: "group", groupCode: "B", position: 2 } },
+  { id: "r24-3", label: "Jogo 3", home: { type: "group", groupCode: "K", position: 1 }, away: { type: "group", groupCode: "C", position: 2 } },
+  { id: "r24-4", label: "Jogo 4", home: { type: "group", groupCode: "L", position: 1 }, away: { type: "group", groupCode: "D", position: 2 } },
+  { id: "r24-5", label: "Jogo 5", home: { type: "group", groupCode: "E", position: 2 }, away: { type: "group", groupCode: "F", position: 2 } },
+  { id: "r24-6", label: "Jogo 6", home: { type: "group", groupCode: "G", position: 2 }, away: { type: "group", groupCode: "H", position: 2 } },
+  { id: "r24-7", label: "Jogo 7", home: { type: "group", groupCode: "I", position: 2 }, away: { type: "group", groupCode: "J", position: 2 } },
+  { id: "r24-8", label: "Jogo 8", home: { type: "group", groupCode: "K", position: 2 }, away: { type: "group", groupCode: "L", position: 2 } }
 ];
 
 const derivedRoundSources: Array<{
@@ -104,21 +104,21 @@ const derivedRoundSources: Array<{
   home: KnockoutSource;
   away: KnockoutSource;
 }> = [
-  { id: "r16-1", round: "roundOf16", label: "Round of 16 1", home: { type: "group", groupCode: "A", position: 1 }, away: { type: "winner", matchId: "r24-1" } },
-  { id: "r16-2", round: "roundOf16", label: "Round of 16 2", home: { type: "group", groupCode: "B", position: 1 }, away: { type: "winner", matchId: "r24-2" } },
-  { id: "r16-3", round: "roundOf16", label: "Round of 16 3", home: { type: "group", groupCode: "C", position: 1 }, away: { type: "winner", matchId: "r24-3" } },
-  { id: "r16-4", round: "roundOf16", label: "Round of 16 4", home: { type: "group", groupCode: "D", position: 1 }, away: { type: "winner", matchId: "r24-4" } },
-  { id: "r16-5", round: "roundOf16", label: "Round of 16 5", home: { type: "group", groupCode: "E", position: 1 }, away: { type: "winner", matchId: "r24-5" } },
-  { id: "r16-6", round: "roundOf16", label: "Round of 16 6", home: { type: "group", groupCode: "F", position: 1 }, away: { type: "winner", matchId: "r24-6" } },
-  { id: "r16-7", round: "roundOf16", label: "Round of 16 7", home: { type: "group", groupCode: "G", position: 1 }, away: { type: "winner", matchId: "r24-7" } },
-  { id: "r16-8", round: "roundOf16", label: "Round of 16 8", home: { type: "group", groupCode: "H", position: 1 }, away: { type: "winner", matchId: "r24-8" } },
-  { id: "qf-1", round: "quarterfinal", label: "Quarterfinal 1", home: { type: "winner", matchId: "r16-1" }, away: { type: "winner", matchId: "r16-2" } },
-  { id: "qf-2", round: "quarterfinal", label: "Quarterfinal 2", home: { type: "winner", matchId: "r16-3" }, away: { type: "winner", matchId: "r16-4" } },
-  { id: "qf-3", round: "quarterfinal", label: "Quarterfinal 3", home: { type: "winner", matchId: "r16-5" }, away: { type: "winner", matchId: "r16-6" } },
-  { id: "qf-4", round: "quarterfinal", label: "Quarterfinal 4", home: { type: "winner", matchId: "r16-7" }, away: { type: "winner", matchId: "r16-8" } },
+  { id: "r16-1", round: "roundOf16", label: "Oitavas 1", home: { type: "group", groupCode: "A", position: 1 }, away: { type: "winner", matchId: "r24-1" } },
+  { id: "r16-2", round: "roundOf16", label: "Oitavas 2", home: { type: "group", groupCode: "B", position: 1 }, away: { type: "winner", matchId: "r24-2" } },
+  { id: "r16-3", round: "roundOf16", label: "Oitavas 3", home: { type: "group", groupCode: "C", position: 1 }, away: { type: "winner", matchId: "r24-3" } },
+  { id: "r16-4", round: "roundOf16", label: "Oitavas 4", home: { type: "group", groupCode: "D", position: 1 }, away: { type: "winner", matchId: "r24-4" } },
+  { id: "r16-5", round: "roundOf16", label: "Oitavas 5", home: { type: "group", groupCode: "E", position: 1 }, away: { type: "winner", matchId: "r24-5" } },
+  { id: "r16-6", round: "roundOf16", label: "Oitavas 6", home: { type: "group", groupCode: "F", position: 1 }, away: { type: "winner", matchId: "r24-6" } },
+  { id: "r16-7", round: "roundOf16", label: "Oitavas 7", home: { type: "group", groupCode: "G", position: 1 }, away: { type: "winner", matchId: "r24-7" } },
+  { id: "r16-8", round: "roundOf16", label: "Oitavas 8", home: { type: "group", groupCode: "H", position: 1 }, away: { type: "winner", matchId: "r24-8" } },
+  { id: "qf-1", round: "quarterfinal", label: "Quartas 1", home: { type: "winner", matchId: "r16-1" }, away: { type: "winner", matchId: "r16-2" } },
+  { id: "qf-2", round: "quarterfinal", label: "Quartas 2", home: { type: "winner", matchId: "r16-3" }, away: { type: "winner", matchId: "r16-4" } },
+  { id: "qf-3", round: "quarterfinal", label: "Quartas 3", home: { type: "winner", matchId: "r16-5" }, away: { type: "winner", matchId: "r16-6" } },
+  { id: "qf-4", round: "quarterfinal", label: "Quartas 4", home: { type: "winner", matchId: "r16-7" }, away: { type: "winner", matchId: "r16-8" } },
   { id: "sf-1", round: "semifinal", label: "Semifinal 1", home: { type: "winner", matchId: "qf-1" }, away: { type: "winner", matchId: "qf-2" } },
   { id: "sf-2", round: "semifinal", label: "Semifinal 2", home: { type: "winner", matchId: "qf-3" }, away: { type: "winner", matchId: "qf-4" } },
-  { id: "third", round: "thirdPlace", label: "Third-place match", home: { type: "loser", matchId: "sf-1" }, away: { type: "loser", matchId: "sf-2" } },
+  { id: "third", round: "thirdPlace", label: "Disputa de 3º lugar", home: { type: "loser", matchId: "sf-1" }, away: { type: "loser", matchId: "sf-2" } },
   { id: "final", round: "final", label: "Final", home: { type: "winner", matchId: "sf-1" }, away: { type: "winner", matchId: "sf-2" } }
 ];
 

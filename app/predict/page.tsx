@@ -153,18 +153,20 @@ export default function PredictPage() {
         <div className="mb-6 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">
-                Prediction builder
+              <p className="inline-flex rounded-full bg-[#f2f9ff] px-3 py-1 text-xs font-semibold tracking-[0.125px] text-[#097fe8]">
+                Previsão da Copa
               </p>
-              <h1 className="mt-2 text-3xl font-black sm:text-4xl">Your World Cup path</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Pick the two teams that qualify from each group. Then choose every knockout winner.
+              <h1 className="mt-3 text-[32px] font-bold leading-tight tracking-[-0.8px] text-[rgba(0,0,0,0.95)] sm:text-[48px] sm:leading-none sm:tracking-[-1.5px]">
+                Seu caminho até a taça
+              </h1>
+              <p className="mt-3 max-w-2xl text-base leading-6 text-[#615d59]">
+                Escolha dois classificados por grupo e depois avance o mata-mata até o campeão.
               </p>
             </div>
             {saved ? (
-              <div className="inline-flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#f2f9ff] px-3 py-2 text-sm font-semibold text-[#097fe8]">
                 <CheckCircle2 className="size-4" />
-                Saved locally
+                Salvo localmente
               </div>
             ) : null}
           </div>
@@ -193,15 +195,15 @@ export default function PredictPage() {
               <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">
                   {groupStageComplete
-                    ? "All group qualifiers are selected. The knockout bracket is ready."
-                    : "Choose 1st and 2nd place in every group to unlock the knockout bracket."}
+                    ? "Todos os classificados foram escolhidos. O mata-mata está pronto."
+                    : "Escolha o 1º e o 2º colocado de todos os grupos para liberar o mata-mata."}
                 </p>
                 <Button
                   type="button"
                   disabled={!groupStageComplete}
                   onClick={() => setStep(1)}
                 >
-                  Build knockout bracket
+                  Abrir mata-mata
                   <ArrowRight className="ml-2 size-4" />
                 </Button>
               </CardContent>
@@ -222,15 +224,15 @@ export default function PredictPage() {
                   <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-sm text-muted-foreground">
                       {knockoutComplete
-                        ? "The champion is set. Review the full prediction."
-                        : "Pick winners through the final to complete the tournament."}
+                        ? "O campeão está definido. Revise sua previsão completa."
+                        : "Escolha os vencedores até a final para completar o torneio."}
                     </p>
                     <Button
                       type="button"
                       disabled={!knockoutComplete}
                       onClick={() => setStep(2)}
                     >
-                      Review prediction
+                      Revisar previsão
                       <ArrowRight className="ml-2 size-4" />
                     </Button>
                   </CardContent>
@@ -239,12 +241,12 @@ export default function PredictPage() {
             ) : (
               <Card>
                 <CardContent className="p-5">
-                  <h2 className="text-lg font-bold">Group stage first</h2>
+                  <h2 className="text-[22px] font-bold leading-tight tracking-[-0.25px]">Grupos primeiro</h2>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Choose the two qualifiers from every group before opening the bracket.
+                    Escolha os dois classificados de todos os grupos antes de abrir o chaveamento.
                   </p>
                   <Button className="mt-4" type="button" onClick={() => setStep(0)}>
-                    Return to group stage
+                    Voltar para grupos
                   </Button>
                 </CardContent>
               </Card>
