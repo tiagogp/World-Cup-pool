@@ -13,4 +13,4 @@ export const siteName = "Bolão da Copa 2026";
 export const siteDescription =
   "Bolão da Copa 2026 para montar sua previsão: escolha os classificados dos grupos, complete o mata-mata e compartilhe sua chave.";
 
-export const siteOgImage = `${siteUrl}/opengraph-image`;
+export const siteOgImage = `${siteUrl}/og.jpg`;

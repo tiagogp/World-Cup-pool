@@ -1,0 +1,7 @@
+{
+  "allowedTools": [
+    "edit_file",
+    "run_command:npm run build",
+    "write_file"
+  ]
+}
