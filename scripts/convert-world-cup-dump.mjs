@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Convert Globo's World Cup JSON to this project's `Team[]` + `Group[]` shape.
+ * Convert a World Cup JSON dump to this project's `Team[]` + `Group[]` shape.
  *
  * Usage:
- *   node scripts/convert-globo.mjs path/to/globo.json
- *   cat globo.json | node scripts/convert-globo.mjs
+ *   node scripts/convert-world-cup-dump.mjs path/to/dump.json
+ *   cat dump.json | node scripts/convert-world-cup-dump.mjs
  */
 
 import fs from "node:fs";
@@ -45,7 +45,7 @@ function flagCodeFromEmoji(emoji) {
   return c1 + c2;
 }
 
-// Our canonical ids are mostly 3-letter, but differ from Globo in a few cases.
+// Our canonical ids are mostly 3-letter, but differ from the source dump in a few cases.
 const idOverridesBySlug = {
   alemanha: "ger",
   "estados-unidos": "usa",
@@ -66,13 +66,13 @@ const flagCodeOverridesBySlug = {
   "pais-de-gales": "GB"
 };
 
-function teamIdFromGloboTeam(team) {
+function teamIdFromSourceTeam(team) {
   const slug = String(team?.slug ?? "").trim();
   if (!slug) return null;
   return idOverridesBySlug[slug] ?? normalize(team.sigla).slice(0, 3);
 }
 
-function groupCodeFromGloboGroup(group) {
+function groupCodeFromSourceGroup(group) {
   const name = String(group?.nome_grupo ?? "");
   const match = name.match(/Grupo\s+([A-Z])/i);
   if (match?.[1]) return match[1].toUpperCase();
@@ -89,15 +89,15 @@ function main() {
   const raw = readInput(process.argv[2]);
   const parsed = JSON.parse(raw);
 
-  const globoTeams = Array.isArray(parsed?.equipes) ? parsed.equipes : [];
-  const globoGroups = Array.isArray(parsed?.grupos) ? parsed.grupos : [];
+  const sourceTeams = Array.isArray(parsed?.equipes) ? parsed.equipes : [];
+  const sourceGroups = Array.isArray(parsed?.grupos) ? parsed.grupos : [];
 
   const equipeIdToTeam = new Map(
-    globoTeams.map((team) => [team?.equipe_id, team]).filter(([id]) => typeof id === "number")
+    sourceTeams.map((team) => [team?.equipe_id, team]).filter(([id]) => typeof id === "number")
   );
 
   const usedEquipeIds = new Set();
-  for (const group of globoGroups) {
+  for (const group of sourceGroups) {
     for (const entry of group?.classificacao ?? []) {
       if (typeof entry?.equipe_id === "number") usedEquipeIds.add(entry.equipe_id);
     }
@@ -109,7 +109,7 @@ function main() {
 
   const teams = usedTeams
     .map((team) => {
-      const id = teamIdFromGloboTeam(team);
+      const id = teamIdFromSourceTeam(team);
       if (!id) {
         throw new Error(`Missing team id for slug=${JSON.stringify(team?.slug)}`);
       }
@@ -129,19 +129,19 @@ function main() {
     })
     .sort((a, b) => a.id.localeCompare(b.id, "pt-BR"));
 
-  const globoTeamIdByEquipeId = new Map(
-    usedTeams.map((team) => [team.equipe_id, teamIdFromGloboTeam(team)])
+  const sourceTeamIdByEquipeId = new Map(
+    usedTeams.map((team) => [team.equipe_id, teamIdFromSourceTeam(team)])
   );
 
-  const groups = globoGroups
+  const groups = sourceGroups
     .map((group) => {
-      const code = groupCodeFromGloboGroup(group);
+      const code = groupCodeFromSourceGroup(group);
       if (!code) {
         throw new Error(`Missing group code for nome_grupo=${JSON.stringify(group?.nome_grupo)}`);
       }
 
       const teamIds = (group?.classificacao ?? []).map((entry) => {
-        const id = globoTeamIdByEquipeId.get(entry?.equipe_id);
+        const id = sourceTeamIdByEquipeId.get(entry?.equipe_id);
         if (!id) {
           throw new Error(
             `Unknown equipe_id=${JSON.stringify(entry?.equipe_id)} for group ${code}`
@@ -165,4 +165,3 @@ export const groups: Group[] = ${JSON.stringify(groups, null, 2)};
 }
 
 main();
-

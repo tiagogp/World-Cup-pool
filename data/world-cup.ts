@@ -12,7 +12,7 @@ export const teams: Team[] = [
   { id: "bra", name: "Brasil", shortName: "BRA", flagCode: "BR" },
   { id: "mar", name: "Marrocos", shortName: "MAR", flagCode: "MA" },
   { id: "hai", name: "Haiti", shortName: "HAI", flagCode: "HT" },
-  { id: "sco", name: "Escócia", shortName: "SCO", flagCode: "GB" },
+  { id: "sco", name: "Escócia", shortName: "SCO", flagCode: "GB_SCT" },
   { id: "usa", name: "Estados Unidos", shortName: "USA", flagCode: "US" },
   { id: "par", name: "Paraguai", shortName: "PAR", flagCode: "PY" },
   { id: "aus", name: "Austrália", shortName: "AUS", flagCode: "AU" },
@@ -45,10 +45,10 @@ export const teams: Team[] = [
   { id: "rdc", name: "RD Congo", shortName: "RDC", flagCode: "CD" },
   { id: "uzb", name: "Uzbequistão", shortName: "UZB", flagCode: "UZ" },
   { id: "col", name: "Colômbia", shortName: "COL", flagCode: "CO" },
-  { id: "eng", name: "Inglaterra", shortName: "ENG", flagCode: "GB" },
+  { id: "eng", name: "Inglaterra", shortName: "ENG", flagCode: "GB_ENG" },
   { id: "cro", name: "Croácia", shortName: "CRO", flagCode: "HR" },
   { id: "gha", name: "Gana", shortName: "GHA", flagCode: "GH" },
-  { id: "pan", name: "Panamá", shortName: "PAN", flagCode: "PA" }
+  { id: "pan", name: "Panamá", shortName: "PAN", flagCode: "PA" },
 ];
 
 export const groups: Group[] = [
@@ -63,5 +63,5 @@ export const groups: Group[] = [
   { code: "I", teamIds: ["fra", "sen", "irq", "nor"] },
   { code: "J", teamIds: ["arg", "alg", "aut", "jor"] },
   { code: "K", teamIds: ["por", "rdc", "uzb", "col"] },
-  { code: "L", teamIds: ["eng", "cro", "gha", "pan"] }
+  { code: "L", teamIds: ["eng", "cro", "gha", "pan"] },
 ];
