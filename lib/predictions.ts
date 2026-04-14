@@ -22,7 +22,8 @@ export function createEmptyGroupPicks(): Record<string, GroupPick> {
       {
         groupCode: group.code,
         firstTeamId: null,
-        secondTeamId: null
+        secondTeamId: null,
+        thirdTeamId: null
       }
     ])
   );
@@ -31,6 +32,7 @@ export function createEmptyGroupPicks(): Record<string, GroupPick> {
 export function getInitialPredictionState(): PredictionState {
   return {
     groupPicks: createEmptyGroupPicks(),
+    bestThirdGroupCodes: [],
     knockoutSelections: {},
     championTeamId: null
   };
@@ -51,13 +53,21 @@ function normalizeGroupPicks(groupPicks: Partial<Record<string, GroupPick>>) {
         pick.secondTeamId !== firstTeamId
           ? pick.secondTeamId
           : null;
+      const thirdTeamId =
+        pick?.thirdTeamId &&
+        validTeamIds.has(pick.thirdTeamId) &&
+        pick.thirdTeamId !== firstTeamId &&
+        pick.thirdTeamId !== secondTeamId
+          ? pick.thirdTeamId
+          : null;
 
       return [
         group.code,
         {
           ...emptyGroupPicks[group.code],
           firstTeamId,
-          secondTeamId
+          secondTeamId,
+          thirdTeamId
         }
       ];
     })
@@ -80,6 +90,10 @@ export function getQualifiersByGroup(
         qualifiers.push({ teamId: pick.secondTeamId, position: 2 });
       }
 
+      if (pick?.thirdTeamId) {
+        qualifiers.push({ teamId: pick.thirdTeamId, position: 3 });
+      }
+
       return [group.code, qualifiers];
     })
   );
@@ -91,7 +105,10 @@ export function areGroupPredictionsComplete(groupPicks: Record<string, GroupPick
     return Boolean(
       pick?.firstTeamId &&
         pick.secondTeamId &&
-        pick.firstTeamId !== pick.secondTeamId
+        pick.thirdTeamId &&
+        pick.firstTeamId !== pick.secondTeamId &&
+        pick.firstTeamId !== pick.thirdTeamId &&
+        pick.secondTeamId !== pick.thirdTeamId
     );
   });
 }
@@ -99,7 +116,7 @@ export function areGroupPredictionsComplete(groupPicks: Record<string, GroupPick
 function getPickedTeamId(
   qualifiersByGroup: Record<string, GroupQualifier[]>,
   groupCode: string,
-  position: 1 | 2
+  position: 1 | 2 | 3
 ) {
   return (
     qualifiersByGroup[groupCode]?.find((qualifier) => qualifier.position === position)?.teamId ??
@@ -107,20 +124,81 @@ function getPickedTeamId(
   );
 }
 
-const roundOf24Sources: Array<{
+type ThirdSlotDefinition = {
+  key: string;
+  allowedGroupCodes: string[];
+};
+
+function computeThirdSlotAssignments(
+  thirdSlots: ThirdSlotDefinition[],
+  selectedThirdGroupCodes: string[]
+): Map<string, string> {
+  const wanted = new Set(selectedThirdGroupCodes);
+  const slots = thirdSlots
+    .map((slot) => ({
+      ...slot,
+      candidates: slot.allowedGroupCodes.filter((groupCode) => wanted.has(groupCode)).sort()
+    }))
+    .sort((a, b) => a.candidates.length - b.candidates.length || a.key.localeCompare(b.key));
+
+  const assignment = new Map<string, string>();
+  const used = new Set<string>();
+
+  const dfs = (index: number): boolean => {
+    if (index >= slots.length) {
+      return used.size === wanted.size && assignment.size === slots.length;
+    }
+
+    const slot = slots[index];
+
+    for (const groupCode of slot.candidates) {
+      if (used.has(groupCode)) {
+        continue;
+      }
+
+      used.add(groupCode);
+      assignment.set(slot.key, groupCode);
+
+      if (dfs(index + 1)) {
+        return true;
+      }
+
+      used.delete(groupCode);
+      assignment.delete(slot.key);
+    }
+
+    return false;
+  };
+
+  if (!dfs(0)) {
+    return new Map();
+  }
+
+  return assignment;
+}
+
+const roundOf32Sources: Array<{
   id: string;
   label: string;
   home: KnockoutSource;
   away: KnockoutSource;
 }> = [
-  { id: "r24-1", label: "Jogo 1", home: { type: "group", groupCode: "I", position: 1 }, away: { type: "group", groupCode: "A", position: 2 } },
-  { id: "r24-2", label: "Jogo 2", home: { type: "group", groupCode: "J", position: 1 }, away: { type: "group", groupCode: "B", position: 2 } },
-  { id: "r24-3", label: "Jogo 3", home: { type: "group", groupCode: "K", position: 1 }, away: { type: "group", groupCode: "C", position: 2 } },
-  { id: "r24-4", label: "Jogo 4", home: { type: "group", groupCode: "L", position: 1 }, away: { type: "group", groupCode: "D", position: 2 } },
-  { id: "r24-5", label: "Jogo 5", home: { type: "group", groupCode: "E", position: 2 }, away: { type: "group", groupCode: "F", position: 2 } },
-  { id: "r24-6", label: "Jogo 6", home: { type: "group", groupCode: "G", position: 2 }, away: { type: "group", groupCode: "H", position: 2 } },
-  { id: "r24-7", label: "Jogo 7", home: { type: "group", groupCode: "I", position: 2 }, away: { type: "group", groupCode: "J", position: 2 } },
-  { id: "r24-8", label: "Jogo 8", home: { type: "group", groupCode: "K", position: 2 }, away: { type: "group", groupCode: "L", position: 2 } }
+  { id: "r32-1", label: "Jogo 1", home: { type: "group", groupCode: "E", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["A", "B", "C", "D", "F"] } },
+  { id: "r32-2", label: "Jogo 2", home: { type: "group", groupCode: "I", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["C", "D", "F", "G", "H"] } },
+  { id: "r32-3", label: "Jogo 3", home: { type: "group", groupCode: "A", position: 2 }, away: { type: "group", groupCode: "B", position: 2 } },
+  { id: "r32-4", label: "Jogo 4", home: { type: "group", groupCode: "F", position: 1 }, away: { type: "group", groupCode: "C", position: 2 } },
+  { id: "r32-5", label: "Jogo 5", home: { type: "group", groupCode: "K", position: 2 }, away: { type: "group", groupCode: "L", position: 2 } },
+  { id: "r32-6", label: "Jogo 6", home: { type: "group", groupCode: "H", position: 1 }, away: { type: "group", groupCode: "J", position: 2 } },
+  { id: "r32-7", label: "Jogo 7", home: { type: "group", groupCode: "D", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["B", "E", "F", "I", "J"] } },
+  { id: "r32-8", label: "Jogo 8", home: { type: "group", groupCode: "G", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["A", "E", "H", "I", "J"] } },
+  { id: "r32-9", label: "Jogo 9", home: { type: "group", groupCode: "C", position: 1 }, away: { type: "group", groupCode: "F", position: 2 } },
+  { id: "r32-10", label: "Jogo 10", home: { type: "group", groupCode: "E", position: 2 }, away: { type: "group", groupCode: "I", position: 2 } },
+  { id: "r32-11", label: "Jogo 11", home: { type: "group", groupCode: "A", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["C", "E", "F", "H", "I"] } },
+  { id: "r32-12", label: "Jogo 12", home: { type: "group", groupCode: "L", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["E", "H", "I", "J", "K"] } },
+  { id: "r32-13", label: "Jogo 13", home: { type: "group", groupCode: "J", position: 1 }, away: { type: "group", groupCode: "H", position: 2 } },
+  { id: "r32-14", label: "Jogo 14", home: { type: "group", groupCode: "D", position: 2 }, away: { type: "group", groupCode: "G", position: 2 } },
+  { id: "r32-15", label: "Jogo 15", home: { type: "group", groupCode: "B", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["E", "F", "G", "I", "J"] } },
+  { id: "r32-16", label: "Jogo 16", home: { type: "group", groupCode: "K", position: 1 }, away: { type: "bestThird", allowedGroupCodes: ["D", "E", "I", "J", "L"] } }
 ];
 
 const derivedRoundSources: Array<{
@@ -130,14 +208,14 @@ const derivedRoundSources: Array<{
   home: KnockoutSource;
   away: KnockoutSource;
 }> = [
-  { id: "r16-1", round: "roundOf16", label: "Oitavas 1", home: { type: "group", groupCode: "A", position: 1 }, away: { type: "winner", matchId: "r24-1" } },
-  { id: "r16-2", round: "roundOf16", label: "Oitavas 2", home: { type: "group", groupCode: "B", position: 1 }, away: { type: "winner", matchId: "r24-2" } },
-  { id: "r16-3", round: "roundOf16", label: "Oitavas 3", home: { type: "group", groupCode: "C", position: 1 }, away: { type: "winner", matchId: "r24-3" } },
-  { id: "r16-4", round: "roundOf16", label: "Oitavas 4", home: { type: "group", groupCode: "D", position: 1 }, away: { type: "winner", matchId: "r24-4" } },
-  { id: "r16-5", round: "roundOf16", label: "Oitavas 5", home: { type: "group", groupCode: "E", position: 1 }, away: { type: "winner", matchId: "r24-5" } },
-  { id: "r16-6", round: "roundOf16", label: "Oitavas 6", home: { type: "group", groupCode: "F", position: 1 }, away: { type: "winner", matchId: "r24-6" } },
-  { id: "r16-7", round: "roundOf16", label: "Oitavas 7", home: { type: "group", groupCode: "G", position: 1 }, away: { type: "winner", matchId: "r24-7" } },
-  { id: "r16-8", round: "roundOf16", label: "Oitavas 8", home: { type: "group", groupCode: "H", position: 1 }, away: { type: "winner", matchId: "r24-8" } },
+  { id: "r16-1", round: "roundOf16", label: "Oitavas 1", home: { type: "winner", matchId: "r32-1" }, away: { type: "winner", matchId: "r32-2" } },
+  { id: "r16-2", round: "roundOf16", label: "Oitavas 2", home: { type: "winner", matchId: "r32-3" }, away: { type: "winner", matchId: "r32-4" } },
+  { id: "r16-3", round: "roundOf16", label: "Oitavas 3", home: { type: "winner", matchId: "r32-5" }, away: { type: "winner", matchId: "r32-6" } },
+  { id: "r16-4", round: "roundOf16", label: "Oitavas 4", home: { type: "winner", matchId: "r32-7" }, away: { type: "winner", matchId: "r32-8" } },
+  { id: "r16-5", round: "roundOf16", label: "Oitavas 5", home: { type: "winner", matchId: "r32-9" }, away: { type: "winner", matchId: "r32-10" } },
+  { id: "r16-6", round: "roundOf16", label: "Oitavas 6", home: { type: "winner", matchId: "r32-11" }, away: { type: "winner", matchId: "r32-12" } },
+  { id: "r16-7", round: "roundOf16", label: "Oitavas 7", home: { type: "winner", matchId: "r32-13" }, away: { type: "winner", matchId: "r32-14" } },
+  { id: "r16-8", round: "roundOf16", label: "Oitavas 8", home: { type: "winner", matchId: "r32-15" }, away: { type: "winner", matchId: "r32-16" } },
   { id: "qf-1", round: "quarterfinal", label: "Quartas 1", home: { type: "winner", matchId: "r16-1" }, away: { type: "winner", matchId: "r16-2" } },
   { id: "qf-2", round: "quarterfinal", label: "Quartas 2", home: { type: "winner", matchId: "r16-3" }, away: { type: "winner", matchId: "r16-4" } },
   { id: "qf-3", round: "quarterfinal", label: "Quartas 3", home: { type: "winner", matchId: "r16-5" }, away: { type: "winner", matchId: "r16-6" } },
@@ -151,10 +229,23 @@ const derivedRoundSources: Array<{
 function resolveSource(
   source: KnockoutSource,
   qualifiersByGroup: Record<string, GroupQualifier[]>,
-  matchById: Map<string, KnockoutMatch>
+  matchById: Map<string, KnockoutMatch>,
+  thirdSlotAssignments: Map<string, string>,
+  thirdSlotKey: string | null
 ) {
   if (source.type === "group") {
     return getPickedTeamId(qualifiersByGroup, source.groupCode, source.position);
+  }
+
+  if (source.type === "bestThird") {
+    if (!thirdSlotKey) {
+      return null;
+    }
+
+    const assignedGroup = thirdSlotAssignments.get(thirdSlotKey);
+    return assignedGroup
+      ? getPickedTeamId(qualifiersByGroup, assignedGroup, 3)
+      : null;
   }
 
   const sourceMatch = matchById.get(source.matchId);
@@ -171,15 +262,41 @@ function resolveSource(
   return participants.find((teamId) => teamId !== sourceMatch.winnerTeamId) ?? null;
 }
 
-export function generateRoundOf24FromGroups(
-  qualifiersByGroup: Record<string, GroupQualifier[]>
+export function generateRoundOf32FromGroups(
+  qualifiersByGroup: Record<string, GroupQualifier[]>,
+  bestThirdGroupCodes: string[]
 ): KnockoutMatch[] {
-  return roundOf24Sources.map((match) => ({
+  const thirdSlots: ThirdSlotDefinition[] = roundOf32Sources.flatMap((match) => {
+    const slots: ThirdSlotDefinition[] = [];
+    if (match.home.type === "bestThird") {
+      slots.push({ key: `${match.id}:home`, allowedGroupCodes: match.home.allowedGroupCodes });
+    }
+    if (match.away.type === "bestThird") {
+      slots.push({ key: `${match.id}:away`, allowedGroupCodes: match.away.allowedGroupCodes });
+    }
+    return slots;
+  });
+
+  const thirdSlotAssignments = computeThirdSlotAssignments(thirdSlots, bestThirdGroupCodes);
+
+  return roundOf32Sources.map((match) => ({
     id: match.id,
-    round: "roundOf24",
+    round: "roundOf32",
     label: match.label,
-    homeTeamId: resolveSource(match.home, qualifiersByGroup, new Map()),
-    awayTeamId: resolveSource(match.away, qualifiersByGroup, new Map()),
+    homeTeamId: resolveSource(
+      match.home,
+      qualifiersByGroup,
+      new Map(),
+      thirdSlotAssignments,
+      match.home.type === "bestThird" ? `${match.id}:home` : null
+    ),
+    awayTeamId: resolveSource(
+      match.away,
+      qualifiersByGroup,
+      new Map(),
+      thirdSlotAssignments,
+      match.away.type === "bestThird" ? `${match.id}:away` : null
+    ),
     winnerTeamId: null,
     source: {
       home: match.home,
@@ -190,10 +307,22 @@ export function generateRoundOf24FromGroups(
 
 export function advanceKnockoutWinners(
   qualifiersByGroup: Record<string, GroupQualifier[]>,
+  bestThirdGroupCodes: string[],
   knockoutSelections: Record<string, string>
 ): KnockoutMatch[] {
   const matches: KnockoutMatch[] = [];
   const matchById = new Map<string, KnockoutMatch>();
+  const thirdSlots: ThirdSlotDefinition[] = roundOf32Sources.flatMap((match) => {
+    const slots: ThirdSlotDefinition[] = [];
+    if (match.home.type === "bestThird") {
+      slots.push({ key: `${match.id}:home`, allowedGroupCodes: match.home.allowedGroupCodes });
+    }
+    if (match.away.type === "bestThird") {
+      slots.push({ key: `${match.id}:away`, allowedGroupCodes: match.away.allowedGroupCodes });
+    }
+    return slots;
+  });
+  const thirdSlotAssignments = computeThirdSlotAssignments(thirdSlots, bestThirdGroupCodes);
 
   const append = (match: KnockoutMatch) => {
     const selected = knockoutSelections[match.id];
@@ -204,15 +333,40 @@ export function advanceKnockoutWinners(
     matchById.set(safeMatch.id, safeMatch);
   };
 
-  generateRoundOf24FromGroups(qualifiersByGroup).forEach((match) => append(match));
+  roundOf32Sources.forEach((match) => {
+    append({
+      id: match.id,
+      round: "roundOf32",
+      label: match.label,
+      homeTeamId: resolveSource(
+        match.home,
+        qualifiersByGroup,
+        matchById,
+        thirdSlotAssignments,
+        match.home.type === "bestThird" ? `${match.id}:home` : null
+      ),
+      awayTeamId: resolveSource(
+        match.away,
+        qualifiersByGroup,
+        matchById,
+        thirdSlotAssignments,
+        match.away.type === "bestThird" ? `${match.id}:away` : null
+      ),
+      winnerTeamId: null,
+      source: {
+        home: match.home,
+        away: match.away
+      }
+    });
+  });
 
   derivedRoundSources.forEach((definition) => {
     append({
       id: definition.id,
       round: definition.round,
       label: definition.label,
-      homeTeamId: resolveSource(definition.home, qualifiersByGroup, matchById),
-      awayTeamId: resolveSource(definition.away, qualifiersByGroup, matchById),
+      homeTeamId: resolveSource(definition.home, qualifiersByGroup, matchById, thirdSlotAssignments, null),
+      awayTeamId: resolveSource(definition.away, qualifiersByGroup, matchById, thirdSlotAssignments, null),
       winnerTeamId: null,
       source: {
         home: definition.home,
@@ -231,7 +385,7 @@ export function getChampionTeamId(matches: KnockoutMatch[]) {
 const groupPickChars = "0123x";
 const knockoutPickChars = "012";
 const knockoutMatchIds = [
-  ...roundOf24Sources.map((match) => match.id),
+  ...roundOf32Sources.map((match) => match.id),
   ...derivedRoundSources.map((match) => match.id)
 ];
 
@@ -241,15 +395,24 @@ function serializeCompactPredictionState(state: PredictionState) {
       const pick = state.groupPicks[group.code];
       const firstIndex = pick?.firstTeamId ? group.teamIds.indexOf(pick.firstTeamId) : -1;
       const secondIndex = pick?.secondTeamId ? group.teamIds.indexOf(pick.secondTeamId) : -1;
+      const thirdIndex = pick?.thirdTeamId ? group.teamIds.indexOf(pick.thirdTeamId) : -1;
 
       return `${groupPickChars[firstIndex >= 0 ? firstIndex : 4]}${
         groupPickChars[secondIndex >= 0 ? secondIndex : 4]
-      }`;
+      }${groupPickChars[thirdIndex >= 0 ? thirdIndex : 4]}`;
     })
     .join("");
 
   const qualifiersByGroup = getQualifiersByGroup(state.groupPicks);
-  const bracket = advanceKnockoutWinners(qualifiersByGroup, state.knockoutSelections);
+  const bestThirdToken = groups
+    .map((group) => (state.bestThirdGroupCodes.includes(group.code) ? "1" : "0"))
+    .join("");
+
+  const bracket = advanceKnockoutWinners(
+    qualifiersByGroup,
+    state.bestThirdGroupCodes,
+    state.knockoutSelections
+  );
   const matchById = new Map(bracket.map((match) => [match.id, match]));
 
   const knockoutToken = knockoutMatchIds
@@ -272,10 +435,128 @@ function serializeCompactPredictionState(state: PredictionState) {
     })
     .join("");
 
-  return `v2-${groupToken}-${knockoutToken}`;
+  return `v3-${groupToken}-${bestThirdToken}-${knockoutToken}`;
 }
 
 function deserializeCompactPredictionState(value: string): PredictionState | null {
+  const [, groupToken, bestThirdToken, knockoutToken] = value.split("-");
+
+  if (
+    !groupToken ||
+    !bestThirdToken ||
+    !knockoutToken ||
+    groupToken.length !== groups.length * 3 ||
+    bestThirdToken.length !== groups.length
+  ) {
+    return null;
+  }
+
+  const groupPicks = createEmptyGroupPicks();
+
+  groups.forEach((group, groupIndex) => {
+    const firstChar = groupToken[groupIndex * 3];
+    const secondChar = groupToken[groupIndex * 3 + 1];
+    const thirdChar = groupToken[groupIndex * 3 + 2];
+    const firstIndex = groupPickChars.indexOf(firstChar);
+    const secondIndex = groupPickChars.indexOf(secondChar);
+    const thirdIndex = groupPickChars.indexOf(thirdChar);
+    const firstTeamId = firstIndex >= 0 && firstIndex < 4 ? group.teamIds[firstIndex] : null;
+    const secondTeamId =
+      secondIndex >= 0 && secondIndex < 4 && group.teamIds[secondIndex] !== firstTeamId
+        ? group.teamIds[secondIndex]
+        : null;
+    const thirdTeamId =
+      thirdIndex >= 0 &&
+      thirdIndex < 4 &&
+      group.teamIds[thirdIndex] !== firstTeamId &&
+      group.teamIds[thirdIndex] !== secondTeamId
+        ? group.teamIds[thirdIndex]
+        : null;
+
+    groupPicks[group.code] = {
+      groupCode: group.code,
+      firstTeamId,
+      secondTeamId,
+      thirdTeamId
+    };
+  });
+
+  const bestThirdGroupCodes = groups
+    .map((group, index) => (bestThirdToken[index] === "1" ? group.code : null))
+    .filter((value): value is string => Boolean(value));
+
+  const knockoutSelections: Record<string, string> = {};
+  const qualifiersByGroup = getQualifiersByGroup(groupPicks);
+
+  knockoutMatchIds.forEach((matchId, index) => {
+    const pickChar = knockoutToken[index] ?? "0";
+
+    if (!knockoutPickChars.includes(pickChar) || pickChar === "0") {
+      return;
+    }
+
+    const bracket = advanceKnockoutWinners(qualifiersByGroup, bestThirdGroupCodes, knockoutSelections);
+    const match = bracket.find((candidate) => candidate.id === matchId);
+    const selectedTeamId = pickChar === "1" ? match?.homeTeamId : match?.awayTeamId;
+
+    if (selectedTeamId) {
+      knockoutSelections[matchId] = selectedTeamId;
+    }
+  });
+
+  const bracket = advanceKnockoutWinners(qualifiersByGroup, bestThirdGroupCodes, knockoutSelections);
+
+  return {
+    groupPicks,
+    bestThirdGroupCodes,
+    knockoutSelections,
+    championTeamId: getChampionTeamId(bracket)
+  };
+}
+
+export function serializePredictionState(state: PredictionState) {
+  return serializeCompactPredictionState(state);
+}
+
+export function deserializePredictionState(value: string | null): PredictionState | null {
+  if (!value) {
+    return null;
+  }
+
+  if (value.startsWith("v2-")) {
+    const v2 = deserializeLegacyV2CompactPredictionState(value);
+    return v2;
+  }
+
+  if (value.startsWith("v3-")) {
+    return deserializeCompactPredictionState(value);
+  }
+
+  try {
+    const parsed = JSON.parse(atob(decodeURIComponent(value))) as Partial<PredictionState>;
+    if (!parsed.groupPicks || !parsed.knockoutSelections) {
+      return null;
+    }
+
+    const groupPicks = normalizeGroupPicks(parsed.groupPicks);
+    const bestThirdGroupCodes = Array.isArray(parsed.bestThirdGroupCodes)
+      ? parsed.bestThirdGroupCodes.filter((code): code is string => typeof code === "string")
+      : [];
+    const qualifiersByGroup = getQualifiersByGroup(groupPicks);
+    const bracket = advanceKnockoutWinners(qualifiersByGroup, bestThirdGroupCodes, parsed.knockoutSelections);
+
+    return {
+      groupPicks,
+      bestThirdGroupCodes,
+      knockoutSelections: parsed.knockoutSelections,
+      championTeamId: getChampionTeamId(bracket)
+    };
+  } catch {
+    return null;
+  }
+}
+
+function deserializeLegacyV2CompactPredictionState(value: string): PredictionState | null {
   const [, groupToken, knockoutToken] = value.split("-");
 
   if (!groupToken || !knockoutToken || groupToken.length !== groups.length * 2) {
@@ -298,67 +579,15 @@ function deserializeCompactPredictionState(value: string): PredictionState | nul
     groupPicks[group.code] = {
       groupCode: group.code,
       firstTeamId,
-      secondTeamId
+      secondTeamId,
+      thirdTeamId: null
     };
   });
-
-  const knockoutSelections: Record<string, string> = {};
-  const qualifiersByGroup = getQualifiersByGroup(groupPicks);
-
-  knockoutMatchIds.forEach((matchId, index) => {
-    const pickChar = knockoutToken[index] ?? "0";
-
-    if (!knockoutPickChars.includes(pickChar) || pickChar === "0") {
-      return;
-    }
-
-    const bracket = advanceKnockoutWinners(qualifiersByGroup, knockoutSelections);
-    const match = bracket.find((candidate) => candidate.id === matchId);
-    const selectedTeamId = pickChar === "1" ? match?.homeTeamId : match?.awayTeamId;
-
-    if (selectedTeamId) {
-      knockoutSelections[matchId] = selectedTeamId;
-    }
-  });
-
-  const bracket = advanceKnockoutWinners(qualifiersByGroup, knockoutSelections);
 
   return {
     groupPicks,
-    knockoutSelections,
-    championTeamId: getChampionTeamId(bracket)
+    bestThirdGroupCodes: [],
+    knockoutSelections: {},
+    championTeamId: null
   };
-}
-
-export function serializePredictionState(state: PredictionState) {
-  return serializeCompactPredictionState(state);
-}
-
-export function deserializePredictionState(value: string | null): PredictionState | null {
-  if (!value) {
-    return null;
-  }
-
-  if (value.startsWith("v2-")) {
-    return deserializeCompactPredictionState(value);
-  }
-
-  try {
-    const parsed = JSON.parse(atob(decodeURIComponent(value))) as Partial<PredictionState>;
-    if (!parsed.groupPicks || !parsed.knockoutSelections) {
-      return null;
-    }
-
-    const groupPicks = normalizeGroupPicks(parsed.groupPicks);
-    const qualifiersByGroup = getQualifiersByGroup(groupPicks);
-    const bracket = advanceKnockoutWinners(qualifiersByGroup, parsed.knockoutSelections);
-
-    return {
-      groupPicks,
-      knockoutSelections: parsed.knockoutSelections,
-      championTeamId: getChampionTeamId(bracket)
-    };
-  } catch {
-    return null;
-  }
 }

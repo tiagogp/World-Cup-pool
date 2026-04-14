@@ -32,7 +32,11 @@ function SharePageContent() {
   const bracket = useMemo(
     () =>
       prediction && qualifiersByGroup
-        ? advanceKnockoutWinners(qualifiersByGroup, prediction.knockoutSelections)
+        ? advanceKnockoutWinners(
+            qualifiersByGroup,
+            prediction.bestThirdGroupCodes,
+            prediction.knockoutSelections
+          )
         : [],
     [prediction, qualifiersByGroup]
   );
@@ -59,6 +63,7 @@ function SharePageContent() {
           <ReviewSummary
             groups={groups}
             groupPicks={prediction.groupPicks}
+            bestThirdGroupCodes={prediction.bestThirdGroupCodes}
             bracket={bracket}
             championTeamId={championTeamId}
           />

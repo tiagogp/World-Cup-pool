@@ -22,8 +22,7 @@ export function GroupCard({
   onTeamRemove,
   readOnly,
 }: GroupCardProps) {
-  const completed = Boolean(pick.firstTeamId && pick.secondTeamId);
-  const selectedTeamIds = [pick.firstTeamId, pick.secondTeamId].filter(Boolean);
+  const selectedTeamIds = [pick.firstTeamId, pick.secondTeamId, pick.thirdTeamId].filter(Boolean);
 
   return (
     <Card>
@@ -32,17 +31,18 @@ export function GroupCard({
           <div>
             <CardTitle>Grupo {group.code}</CardTitle>
             <p className="mt-1 text-sm font-semibold tracking-[-0.108px] text-[#868685]">
-              Clique em dois times. A ordem define 1º e 2º.
+              Clique em três times. A ordem define 1º, 2º e 3º.
             </p>
           </div>
-          <Badge>{selectedTeamIds.length}/2</Badge>
+          <Badge>{selectedTeamIds.length}/3</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {readOnly && completed ? (
-          <div className="grid gap-2 sm:grid-cols-2">
+        {readOnly ? (
+          <div className="grid gap-2 sm:grid-cols-3">
             <SelectionPill label="1º" teamId={pick.firstTeamId} />
             <SelectionPill label="2º" teamId={pick.secondTeamId} />
+            <SelectionPill label="3º" teamId={pick.thirdTeamId} />
           </div>
         ) : null}
         {!readOnly ? (
@@ -50,7 +50,7 @@ export function GroupCard({
             {group.teamIds.map((teamId) => {
               const selectedIndex = selectedTeamIds.indexOf(teamId);
               const selected = selectedIndex >= 0;
-              const blocked = !selected && selectedTeamIds.length >= 2;
+              const blocked = !selected && selectedTeamIds.length >= 3;
 
               return (
                 <button
@@ -74,7 +74,7 @@ export function GroupCard({
                   <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     {selected ? (
                       <span className="shrink-0 gap-1 text-xs font-semibold tracking-[-0.108px]">
-                        {selectedIndex === 0 ? "1º" : "2º"}
+                        {selectedIndex === 0 ? "1º" : selectedIndex === 1 ? "2º" : "3º"}
                       </span>
                     ) : null}
                     <TeamLabel teamId={teamId} strongCode={selected} />

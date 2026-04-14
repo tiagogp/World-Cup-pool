@@ -12,6 +12,7 @@ import { StepProgress } from "@/components/StepProgress";
 import { GroupCard } from "@/components/GroupCard";
 import { KnockoutBracket } from "@/components/KnockoutBracket";
 import { ReviewSummary } from "@/components/ReviewSummary";
+import { BestThirdSelector } from "@/components/BestThirdSelector";
 import { ShareActions } from "@/components/ShareActions";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { addTeamToGroupPick, removeTeamFromGroupPick } from "@/lib/group-picks";
@@ -89,13 +90,32 @@ export default function PredictPage() {
   );
 
   const groupStageComplete = areGroupPredictionsComplete(state.groupPicks);
+  const bestThirdComplete = useMemo(() => {
+    if (!groupStageComplete) {
+      return false;
+    }
+
+    const unique = new Set(state.bestThirdGroupCodes);
+    if (unique.size !== 8) {
+      return false;
+    }
+
+    return state.bestThirdGroupCodes.every((groupCode) => {
+      const pick = state.groupPicks[groupCode];
+      return Boolean(pick?.thirdTeamId);
+    });
+  }, [groupStageComplete, state.bestThirdGroupCodes, state.groupPicks]);
 
   const bracket = useMemo(
     () =>
-      groupStageComplete
-        ? advanceKnockoutWinners(qualifiersByGroup, state.knockoutSelections)
+      bestThirdComplete
+        ? advanceKnockoutWinners(
+            qualifiersByGroup,
+            state.bestThirdGroupCodes,
+            state.knockoutSelections
+          )
         : [],
-    [groupStageComplete, qualifiersByGroup, state.knockoutSelections]
+    [bestThirdComplete, qualifiersByGroup, state.bestThirdGroupCodes, state.knockoutSelections]
   );
 
   const championTeamId = getChampionTeamId(bracket);
@@ -109,6 +129,7 @@ export default function PredictPage() {
       ...current,
       championTeamId: null,
       knockoutSelections: {},
+      bestThirdGroupCodes: [],
       groupPicks: {
         ...current.groupPicks,
         [groupCode]: addTeamToGroupPick(current.groupPicks[groupCode], teamId)
@@ -124,11 +145,37 @@ export default function PredictPage() {
       ...current,
       championTeamId: null,
       knockoutSelections: {},
+      bestThirdGroupCodes: [],
       groupPicks: {
         ...current.groupPicks,
         [groupCode]: removeTeamFromGroupPick(current.groupPicks[groupCode], teamId)
       }
     }));
+  };
+
+  const toggleBestThirdGroup = (groupCode: string) => {
+    markDirty();
+    setSaved(false);
+    setShareUrl("");
+    setState((current) => {
+      const selected = new Set(current.bestThirdGroupCodes);
+
+      if (selected.has(groupCode)) {
+        selected.delete(groupCode);
+      } else {
+        if (selected.size >= 8) {
+          return current;
+        }
+        selected.add(groupCode);
+      }
+
+      return {
+        ...current,
+        championTeamId: null,
+        knockoutSelections: {},
+        bestThirdGroupCodes: Array.from(selected)
+      };
+    });
   };
 
   const updateWinner = (matchId: string, teamId: string) => {
@@ -202,7 +249,7 @@ export default function PredictPage() {
                 Seu caminho até a taça
               </h1>
               <p className="mt-4 max-w-2xl text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
-                Escolha dois classificados por grupo e depois avance o mata-mata até o campeão.
+                Escolha o 1º, 2º e 3º de cada grupo, selecione os 8 melhores terceiros e avance o mata-mata até o campeão.
               </p>
             </div>
             {saved ? (
@@ -215,7 +262,8 @@ export default function PredictPage() {
           <StepProgress
             currentStep={step}
             onStepChange={setStep}
-            canOpenKnockout={groupStageComplete}
+            canOpenBestThird={groupStageComplete}
+            canOpenKnockout={bestThirdComplete}
             canOpenReview={knockoutComplete}
           />
         </div>
@@ -237,15 +285,15 @@ export default function PredictPage() {
               <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
                   {groupStageComplete
-                    ? "Todos os classificados foram escolhidos. O mata-mata está pronto."
-                    : "Escolha o 1º e o 2º colocado de todos os grupos para liberar o mata-mata."}
+                    ? "Todos os grupos têm 1º, 2º e 3º definidos. Agora selecione os 8 melhores terceiros."
+                    : "Escolha o 1º, 2º e 3º de todos os grupos para avançar."}
                 </p>
                 <Button
                   type="button"
                   disabled={!groupStageComplete}
                   onClick={() => setStep(1)}
                 >
-                  Abrir mata-mata
+                  Selecionar melhores terceiros
                   <ArrowRight className="ml-2 size-4" />
                 </Button>
               </CardContent>
@@ -256,6 +304,50 @@ export default function PredictPage() {
         {step === 1 ? (
           <section className="space-y-5">
             {groupStageComplete ? (
+              <>
+                <BestThirdSelector
+                  groups={groups}
+                  groupPicks={state.groupPicks}
+                  selectedGroupCodes={state.bestThirdGroupCodes}
+                  onToggle={toggleBestThirdGroup}
+                />
+                <Card>
+                  <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
+                      {bestThirdComplete
+                        ? "Os 32 classificados estão definidos. Abra o mata-mata."
+                        : "Selecione 8 terceiros colocados para fechar os 32 classificados."}
+                    </p>
+                    <Button
+                      type="button"
+                      disabled={!bestThirdComplete}
+                      onClick={() => setStep(2)}
+                    >
+                      Abrir mata-mata
+                      <ArrowRight className="ml-2 size-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <Card>
+                <CardContent className="p-5">
+                  <h2 className="wise-display text-[40px] leading-[0.85]">Grupos primeiro</h2>
+                  <p className="mt-3 text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
+                    Escolha o 1º, 2º e 3º de todos os grupos antes de selecionar os melhores terceiros.
+                  </p>
+                  <Button className="mt-4" type="button" onClick={() => setStep(0)}>
+                    Voltar para grupos
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </section>
+        ) : null}
+
+        {step === 2 ? (
+          <section className="space-y-5">
+            {bestThirdComplete ? (
               <>
                 <KnockoutBracket
                   matches={bracket}
@@ -272,7 +364,7 @@ export default function PredictPage() {
                     <Button
                       type="button"
                       disabled={!knockoutComplete}
-                      onClick={() => setStep(2)}
+                      onClick={() => setStep(3)}
                     >
                       Revisar previsão
                       <ArrowRight className="ml-2 size-4" />
@@ -283,12 +375,12 @@ export default function PredictPage() {
             ) : (
               <Card>
                 <CardContent className="p-5">
-                  <h2 className="wise-display text-[40px] leading-[0.85]">Grupos primeiro</h2>
+                  <h2 className="wise-display text-[40px] leading-[0.85]">Melhores terceiros primeiro</h2>
                   <p className="mt-3 text-[18px] font-semibold leading-7 tracking-[-0.108px] text-[#454745]">
-                    Escolha os dois classificados de todos os grupos antes de abrir o chaveamento.
+                    Selecione os 8 melhores terceiros antes de abrir o mata-mata.
                   </p>
-                  <Button className="mt-4" type="button" onClick={() => setStep(0)}>
-                    Voltar para grupos
+                  <Button className="mt-4" type="button" onClick={() => setStep(1)}>
+                    Voltar
                   </Button>
                 </CardContent>
               </Card>
@@ -296,7 +388,7 @@ export default function PredictPage() {
           </section>
         ) : null}
 
-        {step === 2 ? (
+        {step === 3 ? (
           <section className="space-y-5">
             <ShareActions
               shareUrl={shareUrl}
@@ -307,6 +399,7 @@ export default function PredictPage() {
             <ReviewSummary
               groups={groups}
               groupPicks={state.groupPicks}
+              bestThirdGroupCodes={state.bestThirdGroupCodes}
               bracket={bracket}
               championTeamId={championTeamId}
             />

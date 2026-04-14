@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { siteOgImage, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Criar bolão",
   description:
     "Escolha os classificados dos grupos, complete a chave clássica do mata-mata e gere um link para compartilhar sua previsão da Copa 2026.",

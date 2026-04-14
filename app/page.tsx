@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { siteDescription, siteName, siteOgImage, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Bolão e simulador de chaves",
   description: siteDescription,
   alternates: {
@@ -39,7 +40,7 @@ const flow = [
   {
     icon: ListChecks,
     title: "Escolha os classificados",
-    text: "Clique nos dois times que passam em cada grupo, na ordem de classificação.",
+    text: "Clique em 1º, 2º e 3º de cada grupo e selecione os 8 melhores terceiros.",
   },
   {
     icon: Trophy,

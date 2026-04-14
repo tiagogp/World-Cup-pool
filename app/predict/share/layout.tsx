@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { siteOgImage, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Bolão compartilhado",
   description:
     "Veja uma previsão compartilhada da Copa 2026 com classificados por grupo, chave do mata-mata e campeão previsto.",

@@ -14,15 +14,16 @@ export type GroupPick = {
   groupCode: string;
   firstTeamId: string | null;
   secondTeamId: string | null;
+  thirdTeamId: string | null;
 };
 
 export type GroupQualifier = {
   teamId: string;
-  position: 1 | 2;
+  position: 1 | 2 | 3;
 };
 
 export type KnockoutRound =
-  | "roundOf24"
+  | "roundOf32"
   | "roundOf16"
   | "quarterfinal"
   | "semifinal"
@@ -33,7 +34,11 @@ export type KnockoutSource =
   | {
       type: "group";
       groupCode: string;
-      position: 1 | 2;
+      position: 1 | 2 | 3;
+    }
+  | {
+      type: "bestThird";
+      allowedGroupCodes: string[];
     }
   | {
       type: "winner" | "loser";
@@ -55,6 +60,7 @@ export type KnockoutMatch = {
 
 export type PredictionState = {
   groupPicks: Record<string, GroupPick>;
+  bestThirdGroupCodes: string[];
   knockoutSelections: Record<string, string>;
   championTeamId: string | null;
 };

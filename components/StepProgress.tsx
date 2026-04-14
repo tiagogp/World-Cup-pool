@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 
-const steps = ["Grupos", "Mata-mata", "Revisão"];
+const steps = ["Grupos", "Melhores 3º", "Mata-mata", "Revisão"];
 
 type StepProgressProps = {
   currentStep: number;
   onStepChange: (step: number) => void;
+  canOpenBestThird: boolean;
   canOpenKnockout: boolean;
   canOpenReview: boolean;
 };
@@ -12,13 +13,17 @@ type StepProgressProps = {
 export function StepProgress({
   currentStep,
   onStepChange,
+  canOpenBestThird,
   canOpenKnockout,
   canOpenReview
 }: StepProgressProps) {
   return (
-    <nav className="grid grid-cols-3 gap-1 rounded-[28px] bg-[#e8ebe6] p-1 shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px] sm:gap-2 sm:rounded-full">
+    <nav className="grid grid-cols-4 gap-1 rounded-[28px] bg-[#e8ebe6] p-1 shadow-[rgba(14,15,12,0.12)_0px_0px_0px_1px] sm:gap-2 sm:rounded-full">
       {steps.map((step, index) => {
-        const locked = (index === 1 && !canOpenKnockout) || (index === 2 && !canOpenReview);
+        const locked =
+          (index === 1 && !canOpenBestThird) ||
+          (index === 2 && !canOpenKnockout) ||
+          (index === 3 && !canOpenReview);
         return (
           <button
             key={step}

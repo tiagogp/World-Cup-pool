@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { KnockoutMatch, KnockoutRound } from "@/types/predictions";
 
 const roundLabels: Record<KnockoutRound, string> = {
-  roundOf24: "Primeira rodada",
+  roundOf32: "Primeira rodada",
   roundOf16: "Oitavas",
   quarterfinal: "Quartas",
   semifinal: "Semifinais",
@@ -19,23 +19,27 @@ const roundLabels: Record<KnockoutRound, string> = {
 };
 
 const rowStarts: Record<
-  "roundOf24" | "roundOf16" | "quarterfinal" | "semifinal",
+  "roundOf32" | "roundOf16" | "quarterfinal" | "semifinal",
   string[]
 > = {
-  roundOf24: [
+  roundOf32: [
     "lg:row-start-1",
     "lg:row-start-5",
     "lg:row-start-9",
     "lg:row-start-13",
+    "lg:row-start-17",
+    "lg:row-start-21",
+    "lg:row-start-25",
+    "lg:row-start-29",
   ],
   roundOf16: [
-    "lg:row-start-1",
-    "lg:row-start-5",
-    "lg:row-start-9",
-    "lg:row-start-13",
+    "lg:row-start-3",
+    "lg:row-start-11",
+    "lg:row-start-19",
+    "lg:row-start-27",
   ],
-  quarterfinal: ["lg:row-start-3", "lg:row-start-11"],
-  semifinal: ["lg:row-start-7"],
+  quarterfinal: ["lg:row-start-7", "lg:row-start-23"],
+  semifinal: ["lg:row-start-15"],
 };
 
 type KnockoutBracketProps = {
@@ -46,20 +50,20 @@ type KnockoutBracketProps = {
 };
 
 type BracketSide = "left" | "right";
-type SideRound = "roundOf24" | "roundOf16" | "quarterfinal" | "semifinal";
+type SideRound = "roundOf32" | "roundOf16" | "quarterfinal" | "semifinal";
 type BracketPath = {
   id: string;
   d: string;
 };
 
 const leftRounds: SideRound[] = [
-  "roundOf24",
+  "roundOf32",
   "roundOf16",
   "quarterfinal",
   "semifinal",
 ];
 const rightRounds: SideRound[] = [
-  "roundOf24",
+  "roundOf32",
   "roundOf16",
   "quarterfinal",
   "semifinal",
@@ -312,7 +316,7 @@ function BracketSide({
                 {roundMatches.length}
               </span>
             </div>
-            <div className="space-y-3 lg:grid lg:h-[880px] lg:grid-rows-[repeat(16,minmax(0,1fr))] lg:gap-0 lg:space-y-0">
+            <div className="space-y-3 lg:grid lg:h-[1760px] lg:grid-rows-[repeat(32,minmax(0,1fr))] lg:gap-0 lg:space-y-0">
               {roundMatches.map((match, index) => (
                 <div
                   key={match.id}
